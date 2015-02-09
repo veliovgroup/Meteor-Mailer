@@ -30,13 +30,22 @@ application_config:
 
 ## Usage
 ```coffee
-Meteor.mail.send 'to@domain.com', 'subject', 'Plain text or HTML-message', Template, callback
+Meteor.mail.send 'to@domain.com', options, callback
 ```
 
 __Note:__ if `Template` is not set, email will be sent within our default cute and sleek built-in template.
 
-###### Where `Template` is:
-`Template` should be HTML or JADE template with next variables (read: placeholders) - `message` (required), `lang` (optional), `subject` (optional), like: 
+###### Where `options` is:
+```coffeescript
+options:
+ template: "`Template` should be HTML or JADE template with variables (read: placeholders)"
+ message: "Some HTML or plain-text string (required)"
+ subject: "Some HTML or plain-text string (required)"
+ #Any optional keys, like
+ appname: "Your application name"
+ url: "http://localhost:3000"
+
+Example:
 ```html
 <html lang="{{lang}}">
   <head>
@@ -46,6 +55,9 @@ __Note:__ if `Template` is not set, email will be sent within our default cute a
   <body>
     <h3>{{{Subject}}}</h3>
     <p>{{{Message}}}</p>
+    <footer>
+      <a href="{{url}}">{{appname}}</a>
+    </footer>
   </body>
 </html>
 ```
@@ -53,6 +65,6 @@ __Note:__ if `Template` is not set, email will be sent within our default cute a
 ###### Where `callback` is:
 ```coffeescript
 callback = (error, success, recipient) ->
-  console.log "mail is not sent to #{recipient}" if error
-  console.log "mail successfully sent to #{recipient}" if success
+  console.log("mail is not sent to #{recipient}") if error
+  console.log("mail successfully sent to #{recipient}") if success
 ```

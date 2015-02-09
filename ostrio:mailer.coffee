@@ -17,29 +17,23 @@ class Meteor.Mailer
   ###
   @namespace Mailer
   @method send
-  @param  {String} receiver - E-mail address of receiver
-  @param  {String} subject  - Letter subject
-  @param  {String} message  - Message, letter body
+  @param  {String} recipient - E-mail address of recipient
+  @param  {Object|String} options  - Message, subject, letter, body
   @param  {String} template - [OPTIONAL] Full path to template, like 'private/email_templates/name.html'
   ###
-  send: (receiver, subject='No subject', message, template, callback)=>
-
-    HTMLs = 
-      subject: subject
-      message: message
-      template: template
+  send: (recipient, options, callback)=>
 
     try
       Email.send
         from: @settings.login + '@' + @settings.domain
-        to: receiver
-        subject: subject.replace /<(?:.|\n)*?>/gm, ''
-        html: @compileBody HTMLs
-      callback and callback null, true, receiver
+        to: recipient
+        subject: options.subject.replace /<(?:.|\n)*?>/gm, ''
+        html: @compileBody options
+      callback and callback null, true, recipient
 
     catch e
-      callback and callback e, null, receiver
-      console.warn "Email wasn't sent to #{receiver}", e
+      callback and callback e, null, recipient
+      console.warn "Email wasn't sent to #{recipient}", e
 
 
   ###
@@ -55,16 +49,11 @@ class Meteor.Mailer
   compileBody: (opts={})=>
 
     opts.subject or throw new Meteor.Error 500, 'Email subject should be specified', options: opts
-    opts.message or throw new Meteor.Error 500, 'Email message should be specified', options: opts      
+    opts.message or throw new Meteor.Error 500, 'Email message should be specified', options: opts
     
     tmplt = SSR.compileTemplate 'MailerMail', if !opts.template then @basicHTMLTempate else Assets.getText(opts.template)
 
-    Template.MailerMail.helpers
-      subject: opts.subject
-      message: opts.message
-      lang:    opts.lang || @settings.language
-      url:     @app_settings.url
-      appname: @app_settings.appname
+    Template.MailerMail.helpers opts
 
     SSR.render tmplt
 
