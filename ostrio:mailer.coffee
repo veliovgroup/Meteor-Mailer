@@ -22,7 +22,7 @@ class Meteor.Mailer
   @param  {String} message  - Message, letter body
   @param  {String} template - [OPTIONAL] Full path to template, like 'private/email_templates/name.html'
   ###
-  send: (receiver, subject='No subject', message, template)=>
+  send: (receiver, subject='No subject', message, template, callback)=>
 
     HTMLs = 
       subject: subject
@@ -35,7 +35,10 @@ class Meteor.Mailer
         to: receiver
         subject: subject.replace /<(?:.|\n)*?>/gm, ''
         html: @compileBody HTMLs
+      callback and callback null, true, receiver
+
     catch e
+      callback and callback e, null, receiver
       console.warn "Email wasn't sent to #{receiver}", e
 
 

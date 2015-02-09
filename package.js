@@ -1,8 +1,8 @@
 Package.describe({
   name: 'ostrio:mailer',
-  version: '0.0.3',
-  summary: 'Send HTML email, email templating, send emails via SMTP from SERVER ONLY',
-  git: '',
+  version: '0.0.4',
+  summary: 'Send HTML email, email templating, send emails via SMTP [SERVER ONLY]',
+  git: 'https://github.com/VeliovGroup/Meteor-Mailer',
   documentation: 'README.md'
 });
 
