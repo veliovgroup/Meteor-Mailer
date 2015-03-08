@@ -26,10 +26,11 @@ mongo@1.0.11
 observe-sequence@1.0.4
 ordered-dict@1.0.2
 ostrio:jsextensions@0.0.4
-ostrio:mailer@0.1.1
+ostrio:mailer@0.2.0
 random@1.0.2
 reactive-var@1.0.4
 retry@1.0.2
+sha@1.0.2
 spacebars@1.0.5
 spacebars-compiler@1.0.4
 templating@1.0.11

@@ -2,9 +2,11 @@ Meteor Mailer
 =============
 Simply sends emails via built-in Email.send method, but with support of HTML-templates and SMTP.
 
+If there is error with email sending, like connection to SMTP, - email will be putted into queue and tried to send it 50 times after 30 seconds, retry time will be multiplied by 2 every try.
+
 ## Initialization:
 ```coffeescript
-Meteor.mail = new Meteor.Mailer mail_config, application_config
+Meteor.mail = new Meteor.Mailer mail_config, application_config, verbose
 ```
 
 ###### Where `mail_config` is:
@@ -27,6 +29,9 @@ application_config:
   port: "3000"
   language: "en" # -> Application localization
 ```
+
+###### Where `verbose` is `boolean`:
+True/false - on/off verbose mode (Server console)
 
 ## Usage
 ```coffee

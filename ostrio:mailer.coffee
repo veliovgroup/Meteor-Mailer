@@ -4,13 +4,63 @@
 ###
 class Meteor.Mailer
 
+  queue: {}
+
+  queueAdd: (recipient, options, callback) ->
+    key = SHA256 recipient + new Date()
+    @queue[key] = 
+      recipient: recipient
+      options: options
+      callback: callback
+      interval: false
+
+    @queueTry key
+
+  queueClear: (key) ->
+    Meteor.clearTimeout @queue[key].interval.id if @queue[key].interval
+    delete @queue[key]
+
+  queueTry: (key) ->
+    if @queue[key]
+      self = @
+      task = @queue[key]
+      Meteor.clearTimeout task.interval.id if task.interval
+
+      try
+        Email.send
+          from: @settings.login + '@' + @settings.domain
+          to: task.recipient
+          subject: task.options.subject.replace /<(?:.|\n)*?>/gm, ''
+          html: @compileBody task.options
+        task.callback and task.callback null, true, task.recipient
+        @queueClear key
+        console.warn "Email was successfully sent to #{task.recipient}" if @verbose
+      catch e
+        console.warn "Email wasn't sent to #{task.recipient}", e if @verbose
+        time = if @queue[key].interval and @queue[key].interval.time then @queue[key].interval.time * 2 else 1000
+        times = if @queue[key].interval and @queue[key].interval.times then @queue[key].interval.times + 1 else 1
+        if times <= 50
+          @queue[key].interval = 
+            id: Meteor.setTimeout -> 
+              self.queueTry(key)
+            , time
+            time: time
+            times: times
+          task.callback and task.callback e, null, task.recipient
+          console.warn "Trying to send email to #{task.recipient} again for #{times} time(s)" if @verbose
+        else
+          @queueClear key
+          console.error "Give up trying to send email to #{task.recipient}, tried for #{times} time(s). Terminating..." if @verbose
+
   ###
   @namespace Mailer
   @param {Object} settings     - Info about e-mailing, will be exposed to global variable
   @param {Object} app_settings - Info about your app
   @description For more info about constrictor options see README.md and docs
   ###
-  constructor: (@settings = {}, @app_settings = {})->
+  constructor: (@settings = {}, @app_settings = {}, @verbose = false)->
+    check @settings, Object
+    check @app_settings, Object
     process.env.MAIL_URL = @settings.connectionUrl
 
 
@@ -22,19 +72,7 @@ class Meteor.Mailer
   @param  {String} template - [OPTIONAL] Full path to template, like 'private/email_templates/name.html'
   ###
   send: (recipient, options, callback)=>
-
-    try
-      Email.send
-        from: @settings.login + '@' + @settings.domain
-        to: recipient
-        subject: options.subject.replace /<(?:.|\n)*?>/gm, ''
-        html: @compileBody options
-      callback and callback null, true, recipient
-
-    catch e
-      callback and callback e, null, recipient
-      console.warn "Email wasn't sent to #{recipient}", e
-
+    @queueAdd recipient, options, callback
 
   ###
   @namespace Mailer
