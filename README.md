@@ -10,6 +10,7 @@ Meteor.mail = new Meteor.Mailer mail_config, application_config, verbose
 ```
 
 ###### Where `mail_config` is:
+For gmail hosted mail:
 ```coffeescript
 mail_config:
   protocol: 'smtp://'
@@ -18,6 +19,17 @@ mail_config:
   host: 'smtp.gmail.com'
   port: '465'
   domain: 'gmail.com'
+```
+
+For own hosted smtp server:
+```coffeescript
+mail_config:
+  protocol: 'smtp://'
+  login: 'no-reply@your-domain.com'
+  password: 'dslflkads'
+  host: 'smtp.domain-name.com'
+  port: '587'
+  domain: 'smtp.domain-name.com'
 ```
 
 ###### Where `application_config` is:

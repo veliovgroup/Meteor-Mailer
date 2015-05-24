@@ -28,7 +28,7 @@ class Meteor.Mailer
 
       try
         Email.send
-          from: @settings.login + '@' + @settings.domain
+          from: if @settings.login.indexOf('@') isnt -1 then "<#{@settings.login}> #{@app_settings.appname}" else "<#{@settings.login}@#{@settings.domain}> #{@app_settings.appname}"
           to: task.recipient
           subject: task.options.subject.replace /<(?:.|\n)*?>/gm, ''
           html: @compileBody task.options
