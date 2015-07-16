@@ -19,6 +19,7 @@ mail_config:
   host: 'smtp.gmail.com'
   port: '465'
   domain: 'gmail.com'
+  connectionUrl: "smtp://noreply-meteor:fsklfjlksejflweq21@smtp.gmail.com:465"
 ```
 
 For own hosted smtp server:
@@ -30,6 +31,7 @@ mail_config:
   host: 'smtp.domain-name.com'
   port: '587'
   domain: 'smtp.domain-name.com'
+  connectionUrl: "smtp://no-reply@your-domain.com:dslflkads@smtp.domain-name.com:587"
 ```
 
 ###### Where `application_config` is:

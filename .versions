@@ -1,6 +1,7 @@
 base64@1.0.3
 blaze@2.1.2
 blaze-tools@1.0.3
+check@1.0.5
 coffeescript@1.0.6
 deps@1.0.7
 ejson@1.0.6
@@ -18,7 +19,7 @@ minimongo@1.0.8
 observe-sequence@1.0.6
 ordered-dict@1.0.3
 ostrio:jsextensions@0.0.4
-ostrio:mailer@0.2.2
+ostrio:mailer@0.2.3
 random@1.0.3
 reactive-var@1.0.5
 sha@1.0.3

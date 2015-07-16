@@ -9,11 +9,10 @@ class Meteor.Mailer
   queueAdd: (recipient, options, callback) ->
     key = SHA256 recipient + new Date()
     @queue[key] = 
-      recipient: recipient
-      options: options
-      callback: callback
-      interval: false
-
+      recipient:  recipient
+      options:    options
+      callback:   callback
+      interval:   false
     @queueTry key
 
   queueClear: (key) ->
@@ -26,31 +25,32 @@ class Meteor.Mailer
       task = @queue[key]
       Meteor.clearTimeout task.interval.id if task.interval
 
-      try
-        Email.send
-          from: if @settings.login.indexOf('@') isnt -1 then "<#{@settings.login}> #{@app_settings.appname}" else "<#{@settings.login}@#{@settings.domain}> #{@app_settings.appname}"
-          to: task.recipient
-          subject: task.options.subject.replace /<(?:.|\n)*?>/gm, ''
-          html: @compileBody task.options
-        task.callback and task.callback null, true, task.recipient
-        @queueClear key
-        console.warn "Email was successfully sent to #{task.recipient}" if @verbose
-      catch e
-        console.warn "Email wasn't sent to #{task.recipient}", e if @verbose
-        time = if @queue[key].interval and @queue[key].interval.time then @queue[key].interval.time * 2 else 1000
-        times = if @queue[key].interval and @queue[key].interval.times then @queue[key].interval.times + 1 else 1
-        if times <= 50
-          @queue[key].interval = 
-            id: Meteor.setTimeout -> 
-              self.queueTry(key)
-            , time
-            time: time
-            times: times
-          task.callback and task.callback e, null, task.recipient
-          console.warn "Trying to send email to #{task.recipient} again for #{times} time(s)" if @verbose
-        else
-          @queueClear key
-          console.error "Give up trying to send email to #{task.recipient}, tried for #{times} time(s). Terminating..." if @verbose
+      Meteor.defer ->
+        try
+          Email.send
+            from: if self.settings.login.indexOf('self.') isnt -1 then "<#{self.settings.login}> #{self.app_settings.appname}" else "<#{self.settings.login}self.#{self.settings.domain}> #{self.app_settings.appname}"
+            to: task.recipient
+            subject: task.options.subject.replace /<(?:.|\n)*?>/gm, ''
+            html: self.compileBody task.options
+          task.callback and task.callback null, true, task.recipient
+          self.queueClear key
+          console.warn "Email was successfully sent to #{task.recipient}" if self.verbose
+        catch e
+          console.warn "Email wasn't sent to #{task.recipient}", e if self.verbose
+          time = if task.interval and task.interval.time then task.interval.time * 2 else 1000
+          times = if task.interval and task.interval.times then task.interval.times + 1 else 1
+          if times <= 50
+            task.interval = 
+              id: Meteor.setTimeout -> 
+                self.queueTry(key)
+              , time
+              time: time
+              times: times
+            task.callback and task.callback e, null, task.recipient
+            console.warn "Trying to send email to #{task.recipient} again for #{times} time(s)" if self.verbose
+          else
+            self.queueClear key
+            console.error "Give up trying to send email to #{task.recipient}, tried for #{times} time(s). Terminating..." if self.verbose
 
   ###
   @namespace Mailer
@@ -61,7 +61,7 @@ class Meteor.Mailer
   constructor: (@settings = {}, @app_settings = {}, @verbose = false)->
     check @settings, Object
     check @app_settings, Object
-    process.env.MAIL_URL = @settings.connectionUrl
+    process.env.MAIL_URL = @settings.connectionUrl || process.env.MAIL_URL
 
 
   ###
