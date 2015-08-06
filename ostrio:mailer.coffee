@@ -1,3 +1,8 @@
+mailQueue = new Mongo.Collection "__mailQueue__"
+mailQueue._ensureIndex 
+  sendAt: 1
+  background: true
+
 ###
 @class Mailer
 @description Wrapper around Email to ease the usage
@@ -6,51 +11,50 @@ class Meteor.Mailer
 
   queue: {}
 
-  queueAdd: (recipient, options, callback) ->
-    key = SHA256 recipient + new Date()
-    @queue[key] = 
-      recipient:  recipient
-      options:    options
-      callback:   callback
-      interval:   false
-    @queueTry key
+  queueAdd: (to, options, callback, sendAt) ->
+    _id = mailQueue.insert {to, options, sendAt, isSent: false, tries: 0, uid: @uid}
+    @queueTry _id
 
-  queueClear: (key) ->
-    Meteor.clearTimeout @queue[key].interval.id if @queue[key].interval
-    delete @queue[key]
+  queueTry: (_id = false) ->
+    if _id
+      emailsToSend = mailQueue.find _id
+    else
+      emailsToSend = mailQueue.find
+        uid: @uid
+        sendAt:
+          $lte: new Date()
+        isSent: false
+        tries: 
+          $lt: @retryTimes
 
-  queueTry: (key) ->
-    if @queue[key]
-      self = @
-      task = @queue[key]
-      Meteor.clearTimeout task.interval.id if task.interval
-
-      Meteor.defer ->
-        try
-          Email.send
-            from: if self.settings.login.indexOf('self.') isnt -1 then "<#{self.settings.login}> #{self.app_settings.appname}" else "<#{self.settings.login}self.#{self.settings.domain}> #{self.app_settings.appname}"
-            to: task.recipient
-            subject: task.options.subject.replace /<(?:.|\n)*?>/gm, ''
-            html: self.compileBody task.options
-          task.callback and task.callback null, true, task.recipient
-          self.queueClear key
-          console.warn "Email was successfully sent to #{task.recipient}" if self.verbose
-        catch e
-          console.warn "Email wasn't sent to #{task.recipient}", e if self.verbose
-          time = if task.interval and task.interval.time then task.interval.time * 2 else 1000
-          times = if task.interval and task.interval.times then task.interval.times + 1 else 1
-          if times <= 50
-            task.interval = 
-              id: Meteor.setTimeout -> 
-                self.queueTry(key)
-              , time
-              time: time
-              times: times
-            task.callback and task.callback e, null, task.recipient
-            console.warn "Trying to send email to #{task.recipient} again for #{times} time(s)" if self.verbose
-          else
-            self.queueClear key
-            console.error "Give up trying to send email to #{task.recipient}, tried for #{times} time(s). Terminating..." if self.verbose
+    if emailsToSend and emailsToSend.count() > 0
+      emailsToSend.forEach (letter) =>
+        Meteor.defer =>
+          try
+            Email.send
+              from: if !!~@login.indexOf('@') then "<#{@login}> #{@accountName}" else "<#{@login}@#{@host}> #{@accountName}"
+              to: letter.to
+              subject: letter.options.subject.replace /<(?:.|\n)*?>/gm, ''
+              html: @compileBody letter.options
+            letter.callback and letter.callback null, true, letter.to
+            
+            if @saveHistory
+              mailQueue.update 
+                _id: letter._id
+              ,
+                $set: 
+                  isSent: true
+            else
+              mailQueue.remove _id: letter._id
+            console.info "Email was successfully sent to #{letter.to}" if @verbose
+          catch e
+            console.info "Email wasn't sent to #{letter.to}", e if @verbose
+            mailQueue.update 
+              _id: letter._id
+            ,
+              $inc: 
+                tries: 1
+            console.info "Trying to send email to #{letter.to} again for #{++letter.times} time(s)" if @verbose
 
   ###
   @namespace Mailer
@@ -58,10 +62,24 @@ class Meteor.Mailer
   @param {Object} app_settings - Info about your app
   @description For more info about constrictor options see README.md and docs
   ###
-  constructor: (@settings = {}, @app_settings = {}, @verbose = false)->
-    check @settings, Object
-    check @app_settings, Object
-    process.env.MAIL_URL = @settings.connectionUrl || process.env.MAIL_URL
+  constructor: (settings)->
+    check settings, Object
+    {@login, @host, @connectionUrl, @accountName, @verbose, @intervalTime, @saveHistory, @retryTimes, @template} = settings unless _.isEmpty settings
+    check @login, String
+    check @host, String
+    check @connectionUrl, String
+
+    @accountName  ?= @login
+    @verbose      ?= false
+    @intervalTime ?= 60
+    @saveHistory  ?= false
+    @retryTimes   ?= 50
+    @template     ?= false
+    @uid           = SHA256 (@connectionUrl || process.env.MAIL_URL) + @accountName + @login
+
+    process.env.MAIL_URL = @connectionUrl || process.env.MAIL_URL
+
+    Meteor.setInterval @queueTry, @intervalTime * 1000
 
 
   ###
@@ -71,8 +89,13 @@ class Meteor.Mailer
   @param  {Object|String} options  - Message, subject, letter, body
   @param  {String} template - [OPTIONAL] Full path to template, like 'private/email_templates/name.html'
   ###
-  send: (recipient, options, callback)=>
-    @queueAdd recipient, options, callback
+  send: (to, options, callback, sendAt = new Date)=>
+    check to, String
+    check options, Object
+    check options.subject, String
+    check options.message, String
+
+    @queueAdd to, options, callback, sendAt
 
   ###
   @namespace Mailer
@@ -85,11 +108,8 @@ class Meteor.Mailer
     @param  {String} template- [OPTIONAL] Full path to template, like 'private/email_templates/name.html' 
   ###
   compileBody: (opts={})=>
-
-    opts.subject or throw new Meteor.Error 500, 'Email subject should be specified', options: opts
-    opts.message or throw new Meteor.Error 500, 'Email message should be specified', options: opts
     
-    tmplt = SSR.compileTemplate 'MailerMail', if !opts.template then @basicHTMLTempate else Assets.getText(opts.template)
+    tmplt = SSR.compileTemplate 'MailerMail', if not @template then @basicHTMLTempate else Assets.getText(@template)
 
     Template.MailerMail.helpers opts
 

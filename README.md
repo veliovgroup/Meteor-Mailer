@@ -2,69 +2,79 @@ Meteor Mailer
 =============
 Simply sends emails via built-in Email.send method, but with support of HTML-templates and SMTP.
 
-If there is error with email sending, like connection to SMTP, - email will be putted into queue and tried to send it 50 times after 30 seconds, retry time will be multiplied by 2 every try.
+If there is error with email sending, like connection to SMTP, - letter will be placed into queue and tried to send it 50 times after 60 seconds.
 
 ## Initialization:
 ```coffeescript
-Meteor.mail = new Meteor.Mailer mail_config, application_config, verbose
+Meteor.mail = new Meteor.Mailer options
 ```
 
-###### Where `mail_config` is:
+`options` {*Object*} - Object with next properties:
+ - `login` {*String*} - [required] Your login on SMTP server, ex.: `no-reply`
+ - `host` {*String*} - [required] Domain name or IP-address of SMTP server, ex.: `smtp.example.com`
+ - `connectionUrl` {*String*} - [required] Connection (auth) URL with login, password and port, ex.: `smtp://account:password@smtp.gmail.com:465`
+ - `accountName` {*String*} - Name of the account (usually shown next to or instead of email address). By default equals to `login` property, ex.: `Some Service Name Support`
+ - `intervalTime` {*Number*} - How often try to send an email in seconds. By default `60` seconds, ex.: `600`
+ - `retryTimes` {*Number*} - How many times to retry to send email. By default `50`, ex.: `10`
+ - `saveHistory` {*Boolean*} - Save sent emails. By default `false`, ex.: `true`
+ - `verbose` {*Boolean*} - Show messages of sending/pending into server's console. By default `false`, ex.: `true`
+ - `template` {*Boolean*} - Path to html template, ex.: `emailTemplates/signUp.html`
+  - if is not set, email will be sent within our default cute and sleek built-in template
+  - `template` should be asset
+  - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
+
+###### Example:
 For gmail hosted mail:
 ```coffeescript
-mail_config:
-  protocol: 'smtp://'
+Meteor.mail = new Meteor.Mailer
   login: 'noreply-meteor'
-  password: 'fsklfjlksejflweq21'
-  host: 'smtp.gmail.com'
-  port: '465'
-  domain: 'gmail.com'
-  connectionUrl: "smtp://noreply-meteor:fsklfjlksejflweq21@smtp.gmail.com:465"
+  host: 'gmail.com'
+  connectionUrl: "smtp://account:password@smtp.gmail.com:465"
+  accountName: "My Project MailBot"
+  verbose: true
+  intervalTime: 120
+  retryTimes: 10
+  saveHistory: true
+  template: 'emailTemplates/signUp.html'
 ```
 
 For own hosted smtp server:
 ```coffeescript
-mail_config:
-  protocol: 'smtp://'
-  login: 'no-reply@your-domain.com'
-  password: 'dslflkads'
-  host: 'smtp.domain-name.com'
-  port: '587'
-  domain: 'smtp.domain-name.com'
-  connectionUrl: "smtp://no-reply@your-domain.com:dslflkads@smtp.domain-name.com:587"
+Meteor.mail = new Meteor.Mailer
+  login: 'no-reply@example.com'
+  host: 'smtp.example.com'
+  connectionUrl: "smtp://no-reply@example.com:password@smtp.example.com:587"
+  accountName: "My Project MailBot"
 ```
-
-###### Where `application_config` is:
-```coffeescript
-application_config:
-  appname: "Project name" # -> Your project name
-  protocol: "http://"
-  domain: "localhost"
-  port: "3000"
-  language: "en" # -> Application localization
-```
-
-###### Where `verbose` is `boolean`:
-True/false - on/off verbose mode (Server console)
 
 ## Usage
+#### `send()` method
 ```coffee
-Meteor.mail.send 'to@domain.com', options, callback
+Meteor.mail.send recipient, options, callback, sendAt
 ```
 
-__Note:__ if `Template` is not set, email will be sent within our default cute and sleek built-in template.
+ - `recipient` {*String*} - Recipient email address
+ - `options` {*Object*}
+  - `subject` {*String*} - [required] Plain text or HTML
+  - `message` {*String*} - [required] Plain text or HTML with placeholders
+ - `callback` {*Function*} - With `error`, `success` and `recipient` parameters
+ - `sendAt` {*Date*} - Date when email should be sent. By default current time
 
-###### Where `options` is:
+###### Example:
 ```coffeescript
-options:
- template: "`Template` should be HTML or JADE template with variables (read: placeholders)"
+Meteor.mail.send 'to@example.com',
  message: "Some HTML or plain-text string (required)"
  subject: "Some HTML or plain-text string (required)"
  #Any optional keys, like
  appname: "Your application name"
  url: "http://localhost:3000"
+,
+  (error, success, recipient) ->
+    console.log("mail is not sent to #{recipient}") if error
+    console.log("mail successfully sent to #{recipient}") if success
+```
 
-Example:
+###### Template example:
 ```html
 <html lang="{{lang}}">
   <head>
@@ -79,11 +89,4 @@ Example:
     </footer>
   </body>
 </html>
-```
-
-###### Where `callback` is:
-```coffeescript
-callback = (error, success, recipient) ->
-  console.log("mail is not sent to #{recipient}") if error
-  console.log("mail successfully sent to #{recipient}") if success
 ```

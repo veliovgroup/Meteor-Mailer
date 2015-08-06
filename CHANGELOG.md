@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### [1.0.0](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v1.0.0)
+ * Fully rewritten package
+ * Based on top of Mongo
+ * Better everything, please see updated docs
+
 ### [0.2.3](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v0.2.3)
  * Deferred email sending
  * Docs update
