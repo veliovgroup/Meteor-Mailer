@@ -61,6 +61,8 @@ Meteor.mail.send recipient, options, callback, sendAt, template
  - `sendAt` {*Date*} - Date when email should be sent. By default current time
  - `template` {*String*} - Path to html template, ex.: `emailTemplates/reset-password.html`
   - if is not set, by default email will be sent within `template` passed via initialization options or our default template
+  - `template` should be asset
+  - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
 
 ###### Example:
 ```coffeescript
