@@ -18,7 +18,7 @@ Meteor.mail = new Meteor.Mailer options
  - `retryTimes` {*Number*} - How many times to retry to send email. By default `50`, ex.: `10`
  - `saveHistory` {*Boolean*} - Save sent emails. By default `false`, ex.: `true`
  - `verbose` {*Boolean*} - Show messages of sending/pending into server's console. By default `false`, ex.: `true`
- - `template` {*Boolean*} - Path to html template, ex.: `emailTemplates/signUp.html`
+ - `template` {*String*} - Path to html template, ex.: `emailTemplates/signUp.html`
   - if is not set, email will be sent within our default cute and sleek built-in template
   - `template` should be asset
   - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
@@ -50,7 +50,7 @@ Meteor.mail = new Meteor.Mailer
 ## Usage
 #### `send()` method
 ```coffee
-Meteor.mail.send recipient, options, callback, sendAt
+Meteor.mail.send recipient, options, callback, sendAt, template
 ```
 
  - `recipient` {*String*} - Recipient email address
@@ -59,6 +59,8 @@ Meteor.mail.send recipient, options, callback, sendAt
   - `message` {*String*} - [required] Plain text or HTML with placeholders
  - `callback` {*Function*} - With `error`, `success` and `recipient` parameters
  - `sendAt` {*Date*} - Date when email should be sent. By default current time
+ - `template` {*String*} - Path to html template, ex.: `emailTemplates/reset-password.html`
+  - if is not set, by default email will be sent within `template` passed via initialization options or our default template
 
 ###### Example:
 ```coffeescript
@@ -68,6 +70,7 @@ Meteor.mail.send 'to@example.com',
  #Any optional keys, like
  appname: "Your application name"
  url: "http://localhost:3000"
+ lang: 'en'
 ,
   (error, success, recipient) ->
     console.log("mail is not sent to #{recipient}") if error

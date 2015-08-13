@@ -11,8 +11,8 @@ class Meteor.Mailer
 
   queue: {}
 
-  queueAdd: (to, options, callback, sendAt) ->
-    _id = mailQueue.insert {to, options, sendAt, isSent: false, tries: 0, uid: @uid}
+  queueAdd: (to, options, callback, sendAt, template = null) ->
+    _id = mailQueue.insert {to, options, sendAt, isSent: false, tries: 0, uid: @uid, template}
     @queueTry _id
 
   queueTry: (_id = false) ->
@@ -35,7 +35,7 @@ class Meteor.Mailer
               from: if !!~@login.indexOf('@') then "<#{@login}> #{@accountName}" else "<#{@login}@#{@host}> #{@accountName}"
               to: letter.to
               subject: letter.options.subject.replace /<(?:.|\n)*?>/gm, ''
-              html: @compileBody letter.options
+              html: @compileBody letter.options, letter.template
             letter.callback and letter.callback null, true, letter.to
             
             if @saveHistory
@@ -62,7 +62,7 @@ class Meteor.Mailer
   @param {Object} app_settings - Info about your app
   @description For more info about constrictor options see README.md and docs
   ###
-  constructor: (settings)->
+  constructor: (settings) ->
     check settings, Object
     {@login, @host, @connectionUrl, @accountName, @verbose, @intervalTime, @saveHistory, @retryTimes, @template} = settings unless _.isEmpty settings
     check @login, String
@@ -89,13 +89,13 @@ class Meteor.Mailer
   @param  {Object|String} options  - Message, subject, letter, body
   @param  {String} template - [OPTIONAL] Full path to template, like 'private/email_templates/name.html'
   ###
-  send: (to, options, callback, sendAt = new Date)=>
+  send: (to, options, callback, sendAt = new Date, template = null) =>
     check to, String
     check options, Object
     check options.subject, String
     check options.message, String
 
-    @queueAdd to, options, callback, sendAt
+    @queueAdd to, options, callback, sendAt, template
 
   ###
   @namespace Mailer
@@ -107,11 +107,13 @@ class Meteor.Mailer
     @param  {String} lang    - [OPTIONAL] Language
     @param  {String} template- [OPTIONAL] Full path to template, like 'private/email_templates/name.html' 
   ###
-  compileBody: (opts={})=>
-    
-    tmplt = SSR.compileTemplate 'MailerMail', if not @template then @basicHTMLTempate else Assets.getText(@template)
+  compileBody: (opts={}, template) =>
+    if template
+      tmplt = SSR.compileTemplate '___MailerMail___', Assets.getText(template)
+    else
+      tmplt = SSR.compileTemplate '___MailerMail___', if not @template then @basicHTMLTempate else Assets.getText(@template)
 
-    Template.MailerMail.helpers opts
+    Template.___MailerMail___.helpers opts
 
     SSR.render tmplt
 

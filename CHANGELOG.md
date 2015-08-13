@@ -1,6 +1,9 @@
 Changelog
 =========
 
+### [1.0.1](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v1.0.1)
+ * Add `template` support in `send()` method
+
 ### [1.0.0](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v1.0.0)
  * Fully rewritten package
  * Based on top of Mongo
