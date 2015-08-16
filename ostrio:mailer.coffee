@@ -38,7 +38,7 @@ class Meteor.Mailer
               subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
               html: @compileBody letter.helpers, letter.template
 
-            # letter.callback and letter.callback null, true, letter.to
+            letter.callback and letter.callback null, true, letter.to
             
             if @saveHistory
               mailQueue.update 
