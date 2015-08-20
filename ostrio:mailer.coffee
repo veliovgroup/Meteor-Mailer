@@ -10,9 +10,25 @@ mailQueue._ensureIndex
 class Meteor.Mailer
 
   queue: {}
+  callbacks: {}
 
-  queueAdd: (to, subject, helpers, callback, sendAt, template = null) ->
-    _id = mailQueue.insert {to, subject, helpers, callback, sendAt, isSent: false, tries: 0, uid: @uid, template}
+  queueAdd: (opts, callback) ->
+    cbKey = false
+    if callback
+      cbKey = SHA256 opts.to+opts.subject+opts.sendAt+@uid
+      @callbacks[cbKey] = callback
+
+    _id = mailQueue.insert
+      uid:      @uid
+      opts:     opts
+      to:       opts.to
+      subject:  opts.subject
+      template: opts.template
+      sendAt:   opts.sendAt
+      isSent:   false
+      tries:    0
+      callback: cbKey
+
     @queueTry _id
 
   queueTry: (_id = false) ->
@@ -29,17 +45,18 @@ class Meteor.Mailer
 
     if emailsToSend and emailsToSend.count() > 0
       emailsToSend.forEach (letter) =>
-        
         Meteor.defer =>
           try
             Email.send
               from: if !!~@login.indexOf('@') then "<#{@login}> #{@accountName}" else "<#{@login}@#{@host}> #{@accountName}"
               to: letter.to
               subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
-              html: @compileBody letter.helpers, letter.template
+              html: @compileBody letter.opts, letter.template
 
-            letter.callback and letter.callback null, true, letter.to
-            
+            if letter.callback
+              @callbacks[letter.callback] null, true, letter.to
+              delete @callbacks[letter.callback]
+
             if @saveHistory
               mailQueue.update 
                 _id: letter._id
@@ -48,6 +65,7 @@ class Meteor.Mailer
                   isSent: true
             else
               mailQueue.remove _id: letter._id
+
             console.info "Email was successfully sent to #{letter.to}" if @verbose
           catch e
             console.info "Email wasn't sent to #{letter.to}", e if @verbose
@@ -56,12 +74,13 @@ class Meteor.Mailer
             ,
               $inc: 
                 tries: 1
-            console.info "Trying to send email to #{letter.to} again for #{++letter.times} time(s)" if @verbose
 
+            if letter.callback
+              @callbacks[letter.callback] {error: e}, false, letter.to
+            console.info "Trying to send email to #{letter.to} again for #{++letter.times} time(s)" if @verbose
   ###
   @namespace Mailer
-  @param {Object} settings     - Info about e-mailing, will be exposed to global variable
-  @param {Object} app_settings - Info about your app
+  @param {Object} settings - Connection, sending and other settings
   @description For more info about constrictor options see README.md and docs
   ###
   constructor: (settings) ->
@@ -87,34 +106,43 @@ class Meteor.Mailer
   ###
   @namespace Mailer
   @method send
-  @param  {String} recipient - E-mail address of recipient
-  @param  {Object|String} options  - Message, subject, letter, body
-  @param  {String} template - [OPTIONAL] Full path to template, like 'private/email_templates/name.html'
+  @param  {Object} opts - Sending options object with next arguments:
+      {String} recipient  - E-mail address of recipient
+      {String} subject    - Letter Subject (plain-text or HTML)
+      {String} message    - Letter Message (plain-text or HTML)
+      {String} template   - [OPTIONAL] Plain-text or HTML with Spacebars-like placeholders
+      {Date}   sendAt     - [OPTIONAL] When email should be sent (current time - by default)
+      [{String}..]        - Any other property as a String which will be used as template helpers
+      {Function} callback - Callback function: `function(error, success, recipientEmail)`
   ###
-  send: (init) =>
+  send: (opts, callback = false) =>
 
-    check init, Object
-    check init.to, String
-    check init.subject, String
+    opts.sendAt ?= new Date
 
-    @queueAdd init.to, init.subject, init.helpers, init.callback, init.sendAt, init.template
+    check opts, Object
+    check opts.to, String
+    check opts.subject, String
+    check opts.message, String
+    check opts.sendAt, Date
+
+    @queueAdd opts, callback
 
   ###
   @namespace Mailer
   @method  compileBody
-  @param  {Object} opts     
+  @param  {Object} helpers
     Options opts {object} containing:
     @param  {String} subject - Letter subject
     @param  {String} message - Message text, letter body
     @param  {String} lang    - [OPTIONAL] Language
-    @param  {String} template- [OPTIONAL] Full path to template, like 'private/email_templates/name.html' 
+    @param  {String} template- [OPTIONAL] Plain-text or HTML with Spacebars-like placeholders
   ###
   compileBody: (helpers={}, template) =>
 
     if template
       tmplt = SSR.compileTemplate '___MailerMail___', template
     else
-      tmplt = SSR.compileTemplate '___MailerMail___', if not @template then @basicHTMLTempate else Assets.getText(@template)
+      tmplt = SSR.compileTemplate '___MailerMail___', if not @template then @basicHTMLTempate else @template
 
     Template.___MailerMail___.helpers helpers
 

@@ -18,9 +18,9 @@ Meteor.mail = new Meteor.Mailer options
  - `retryTimes` {*Number*} - How many times to retry to send email. By default `50`, ex.: `10`
  - `saveHistory` {*Boolean*} - Save sent emails. By default `false`, ex.: `true`
  - `verbose` {*Boolean*} - Show messages of sending/pending into server's console. By default `false`, ex.: `true`
- - `template` {*String*} - Path to html template, ex.: `emailTemplates/signUp.html`
+ - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
   - if is not set, email will be sent within our default cute and sleek built-in template
-  - `template` should be asset
+  - `template` should be plain-text or HTML with Spacebars-like placeholders, or fetched HTML via `Assets.getText()`
   - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
 
 ###### Example:
@@ -35,7 +35,7 @@ Meteor.mail = new Meteor.Mailer
   intervalTime: 120
   retryTimes: 10
   saveHistory: true
-  template: 'emailTemplates/signUp.html'
+  template: 'Plain-text or HTML with Spacebars-like placeholders'
 ```
 
 For own hosted smtp server:
@@ -50,29 +50,30 @@ Meteor.mail = new Meteor.Mailer
 ## Usage
 #### `send()` method
 ```coffee
-Meteor.mail.send recipient, options, callback, sendAt, template
+Meteor.mail.send options, callback
 ```
-
- - `recipient` {*String*} - Recipient email address
- - `options` {*Object*}
+ - `options` {*Object*}:
+  - `to` {*String*} - Recipient email address
   - `subject` {*String*} - [required] Plain text or HTML
   - `message` {*String*} - [required] Plain text or HTML with placeholders
+  - `sendAt` {*Date*} - Date when email should be sent. By default - current time
+  - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
+    - if is not set, by default email will be sent within `template` passed via initialization options or our default template
+    - `template` should be plain-text or HTML with Spacebars-like placeholders, or fetched HTML via `Assets.getText()`
+    - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
  - `callback` {*Function*} - With `error`, `success` and `recipient` parameters
- - `sendAt` {*Date*} - Date when email should be sent. By default current time
- - `template` {*String*} - Path to html template, ex.: `emailTemplates/reset-password.html`
-  - if is not set, by default email will be sent within `template` passed via initialization options or our default template
-  - `template` should be asset
-  - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
 
 ###### Example:
 ```coffeescript
-Meteor.mail.send 'to@example.com',
- message: "Some HTML or plain-text string (required)"
- subject: "Some HTML or plain-text string (required)"
- #Any optional keys, like
- appname: "Your application name"
- url: "http://localhost:3000"
- lang: 'en'
+Meteor.mail.send 
+  to: 'to@example.com'
+  message: "Some HTML or plain-text string (required)"
+  subject: "Some HTML or plain-text string (required)"
+  #Any optional keys, like
+  template: Assets.getText 'path/to/your/template.html'
+  appname: "Your application name"
+  url: "http://localhost:3000"
+  lang: 'en'
 ,
   (error, success, recipient) ->
     console.log("mail is not sent to #{recipient}") if error

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+### [1.1.0](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v1.0.1)
+ * Fix `send()` callback
+ * `send()` now accepts `Object` and `callback` only (see docs)
+ * `template` property in `send()` and `Meteor.Mailer()` should be plain-text or HTML with Spacebars-like placeholders, or fetched HTML via `Assets.getText()`
+
 ### [1.0.1](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v1.0.1)
  * Add `template` support in `send()` method
 
