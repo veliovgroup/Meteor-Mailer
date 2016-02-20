@@ -53,9 +53,12 @@ Meteor.mail = new Meteor.Mailer
 Meteor.mail.send options, callback
 ```
  - `options` {*Object*}:
-  - `to` {*String*} - Recipient email address
-  - `subject` {*String*} - [required] Plain text or HTML
-  - `message` {*String*} - [required] Plain text or HTML with placeholders
+  - `to` {*String*} - [*required*] Recipient email address
+  - `cc` {*String*} - [*optional*] Recipient email address
+  - `bcc` {*String*} - [*optional*] Recipient email address
+  - `replyTo` {*String*} - [*optional*] Recipient email address
+  - `subject` {*String*} - [*required*] Plain text or HTML
+  - `message` {*String*} - [*required*] Plain text or HTML with placeholders
   - `sendAt` {*Date*} - Date when email should be sent. By default - current time
   - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
     - if is not set, by default email will be sent within `template` passed via initialization options or our default template

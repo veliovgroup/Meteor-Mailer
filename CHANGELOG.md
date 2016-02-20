@@ -1,6 +1,12 @@
 Changelog
 =========
 
+### [1.1.1](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v1.1.1)
+ * Major issues fixes
+ * Security updates
+ * Stability updates
+ * Support for `cc`, `bcc`, `replyTo` options
+
 ### [1.1.0](https://github.com/VeliovGroup/Meteor-Mailer/releases/tag/v1.1.0)
  * Fix `send()` callback
  * `send()` now accepts `Object` and `callback` only (see docs)

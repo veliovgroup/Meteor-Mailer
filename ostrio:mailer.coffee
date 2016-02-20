@@ -1,83 +1,21 @@
 mailQueue = new Mongo.Collection "__mailQueue__"
 mailQueue._ensureIndex 
+  uid: 1
   sendAt: 1
+  isSent: 1
+  tries: 1
   background: true
+
+mailQueue.deny
+  insert: () -> true
+  update: () -> true
+  remove: () -> true
 
 ###
 @class Mailer
 @description Wrapper around Email to ease the usage
 ###
 class Meteor.Mailer
-
-  queue: {}
-  callbacks: {}
-
-  queueAdd: (opts, callback) ->
-    cbKey = false
-    if callback
-      cbKey = SHA256 opts.to+opts.subject+opts.sendAt+@uid
-      @callbacks[cbKey] = callback
-
-    _id = mailQueue.insert
-      uid:      @uid
-      opts:     opts
-      to:       opts.to
-      subject:  opts.subject
-      template: opts.template
-      sendAt:   opts.sendAt
-      isSent:   false
-      tries:    0
-      callback: cbKey
-
-    @queueTry _id
-
-  queueTry: (_id = false) ->
-    if _id
-      emailsToSend = mailQueue.find _id
-    else
-      emailsToSend = mailQueue.find
-        uid: @uid
-        sendAt:
-          $lte: new Date()
-        isSent: false
-        tries: 
-          $lt: @retryTimes
-
-    if emailsToSend and emailsToSend.count() > 0
-      emailsToSend.forEach (letter) =>
-        Meteor.defer =>
-          try
-            Email.send
-              from: if !!~@login.indexOf('@') then "<#{@login}> #{@accountName}" else "<#{@login}@#{@host}> #{@accountName}"
-              to: letter.to
-              subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
-              html: @compileBody letter.opts, letter.template
-
-            if letter.callback
-              @callbacks[letter.callback] null, true, letter.to
-              delete @callbacks[letter.callback]
-
-            if @saveHistory
-              mailQueue.update 
-                _id: letter._id
-              ,
-                $set: 
-                  isSent: true
-            else
-              mailQueue.remove _id: letter._id
-
-            console.info "Email was successfully sent to #{letter.to}" if @verbose
-          catch e
-            console.info "Email wasn't sent to #{letter.to}", e if @verbose
-            mailQueue.update 
-              _id: letter._id
-            ,
-              $inc: 
-                tries: 1
-
-            if letter.callback
-              @callbacks[letter.callback] {error: e}, false, letter.to
-            console.info "Trying to send email to #{letter.to} again for #{++letter.times} time(s)" if @verbose
   ###
   @namespace Mailer
   @param {Object} settings - Connection, sending and other settings
@@ -96,12 +34,80 @@ class Meteor.Mailer
     @saveHistory  ?= false
     @retryTimes   ?= 50
     @template     ?= false
-    @uid           = SHA256 (@connectionUrl || process.env.MAIL_URL) + @accountName + @login
+    @uid           = SHA256 (@connectionUrl or process.env.MAIL_URL) + @accountName + @login
 
-    process.env.MAIL_URL = @connectionUrl || process.env.MAIL_URL
-
+    process.env.MAIL_URL = @connectionUrl or process.env.MAIL_URL
     Meteor.setInterval @queueTry, @intervalTime * 1000
 
+  queue: {}
+  callbacks: {}
+
+  queueAdd: (opts, callback) =>
+    cbKey = false
+    if callback
+      cbKey = SHA256 opts.to+opts.subject+opts.sendAt+@uid
+      @callbacks[cbKey] = callback
+
+    _id = mailQueue.insert
+      uid:      @uid
+      opts:     opts
+      to:       opts.to
+      subject:  opts.subject
+      template: opts.template
+      sendAt:   opts.sendAt
+      isSent:   false
+      tries:    0
+      callback: cbKey
+
+    @queueTry _id
+
+  queueTry: (_id = false) =>
+    if _id
+      emailsToSend = mailQueue.find _id
+    else
+      emailsToSend = mailQueue.find
+        uid: @uid
+        sendAt: $lte: new Date()
+        isSent: false
+        tries: $lt: @retryTimes
+
+    if emailsToSend and emailsToSend.count() > 0
+      _self = @
+      emailsToSend.forEach (letter) -> Meteor.defer ->
+        try
+          Email.send
+            from: if !!~_self.login.indexOf('@') then "<#{_self.login}> #{_self.accountName}" else "<#{_self.login}@#{_self.host}> #{_self.accountName}"
+            to:      letter.to
+            cc:      letter.opts?.cc
+            bcc:     letter.opts?.bcc
+            replyTo: letter.opts?.replyTo
+            subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
+            html: _self.compileBody letter.opts, letter.template
+
+          if letter.callback
+            _self.callbacks[letter.callback] null, true, letter.to
+            delete _self.callbacks[letter.callback]
+
+          if _self.saveHistory
+            mailQueue.update 
+              _id: letter._id
+            ,
+              $set: 
+                isSent: true
+          else
+            mailQueue.remove _id: letter._id
+
+          console.info "Email was successfully sent to #{letter.to}" if _self.verbose
+        catch e
+          console.info "Email wasn't sent to #{letter.to}", e if _self.verbose
+          mailQueue.update 
+            _id: letter._id
+          ,
+            $inc: tries: 1
+
+          if letter.callback
+            _self.callbacks[letter.callback] {error: e}, false, letter.to
+          console.info "Trying to send email to #{letter.to} again for #{++letter.times} time(s)" if _self.verbose
 
   ###
   @namespace Mailer
@@ -121,6 +127,9 @@ class Meteor.Mailer
 
     check opts, Object
     check opts.to, String
+    check opts.cc, Match.Optional String
+    check opts.bcc, Match.Optional String
+    check opts.replyTo, Match.Optional String
     check opts.subject, String
     check opts.message, String
     check opts.sendAt, Date
