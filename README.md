@@ -19,9 +19,8 @@ Meteor.mail = new Meteor.Mailer options
  - `saveHistory` {*Boolean*} - Save sent emails. By default `false`, ex.: `true`
  - `verbose` {*Boolean*} - Show messages of sending/pending into server's console. By default `false`, ex.: `true`
  - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
-  - if is not set, email will be sent within our default cute and sleek built-in template
-  - `template` should be plain-text or HTML with Spacebars-like placeholders, or fetched HTML via `Assets.getText()`
-  - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
+  * if is not set, email will be sent within our default sleek built-in template
+  * `template` should be plain-text or HTML with Spacebars-like placeholders
 
 ###### Example:
 For gmail hosted mail:
