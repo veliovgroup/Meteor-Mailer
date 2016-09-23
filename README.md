@@ -63,8 +63,7 @@ Mailer.send options, callback
   - `sendAt` {*Date*} - Date when email should be sent. By default - current time
   - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
     * if is not set, by default email will be sent within `template` passed via initialization options or our default template
-    * `template` should be plain-text or HTML with Spacebars-like placeholders, or fetched HTML via `Assets.getText()`
-    - read more [about assets](http://docs.meteor.com/#/full/assets_getText)
+    * `template` should be plain-text or HTML with Spacebars-like placeholders
  - `callback` {*Function*} - With `error`, `success` and `recipient` arguments
 
 #### Example:
@@ -74,9 +73,6 @@ Mailer.send({
   message: 'Some HTML or plain-text string (required)',
   subject: 'Some HTML or plain-text string (required)',
   template: '<html> <head> <title>{{Subject}}</title> </head> <body> <h3>{{{Subject}}}</h3> <p>{{{Message}}}</p></body></html>',
-  appname: 'Your application name',
-  url: "http://localhost:3000",
-  lang: 'en'
 }, function(error, success, recipient) {
   if (error) {
     console.log("mail is not sent to " + recipient);
