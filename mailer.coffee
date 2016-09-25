@@ -41,7 +41,7 @@ class Meteor.Mailer
   queueAdd: (opts, callback) =>
     cbKey = false
     if callback
-      cbKey = SHA256 opts.to+opts.subject+opts.sendAt+@uid
+      cbKey = SHA256 "#{opts.to}#{opts.subject}#{opts.sendAt}#{@uid}"
       @callbacks[cbKey] = callback
 
     _id = mailQueue.insert
@@ -102,9 +102,9 @@ class Meteor.Mailer
           ,
             $inc: tries: 1
 
-          if letter.callback
+          if letter.callback and _self.callbacks?[letter.callback]
             _self.callbacks[letter.callback] {error: e}, false, letter.to
-          console.info "Trying to send email to #{letter.to} again for #{++letter.times} time(s)" if _self.verbose
+          console.info "Trying to send email to #{letter.to} again for #{++letter.tries} time(s)" if _self.verbose
         return
 
   ###
