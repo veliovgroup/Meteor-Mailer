@@ -21,22 +21,22 @@ class Meteor.Mailer
     {@login, @host, @connectionUrl, @accountName, @verbose, @intervalTime, @saveHistory, @retryTimes, @template} = settings if Object.keys(settings).length
     check @login, String
     check @host, String
-    check @connectionUrl, String
     
-    @queue         = {}
-    @callbacks     = {}
+    @queue          = {}
+    @callbacks      = {}
+    @connectionUrl ?= process.env.MAIL_URL
+    check @connectionUrl, String
 
-    @accountName  ?= @login
-    @verbose      ?= false
-    @intervalTime ?= 60
-    @saveHistory  ?= false
-    @retryTimes   ?= 50
-    @template     ?= false
-    @uid           = SHA256 (@connectionUrl or process.env.MAIL_URL) + @accountName + @login
+    @accountName   ?= @login
+    @verbose       ?= false
+    @intervalTime  ?= 60
+    @saveHistory   ?= false
+    @retryTimes    ?= 50
+    @template      ?= false
+    @uid            = SHA256 @connectionUrl + @accountName + @login
 
     process.env.MAIL_URL = @connectionUrl or process.env.MAIL_URL
     Meteor.setInterval @queueTry, @intervalTime * 1000
-
 
   queueAdd: (opts, callback) =>
     cbKey = false
