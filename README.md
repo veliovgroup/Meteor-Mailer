@@ -58,7 +58,7 @@ Send:
 #### `.send()` method
 ```js
 Mailer = new MailTime({/* .. */});
-Mailer.send(options, callback)
+Mailer.send(options, callback);
 ```
  - `options` {*Object*}:
   - `to` {*String*} - [*required*] Recipient email address
@@ -71,7 +71,7 @@ Mailer.send(options, callback)
   - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
     * if is not set, by default email will be sent within `template` passed via initialization options or our default template
     * `template` should be plain-text or HTML with Spacebars-like placeholders
- - `callback` {*Function*} - With `error`, `success` and `recipient` arguments
+ - `callback` {*Function*} - [Optional] Arguments `error`, `success` and `recipient` arguments. __Note__: There is no way to use this callback function in multi-server infrastructure, callbacks is stored in-memory and will be wiped upon server restart. *Primary usage for callback is debugging, __do not use for logic/algorithm/etc.__*
 
 #### Example:
 ```js
