@@ -7,13 +7,14 @@ mailQueue.deny
   remove: -> true
 
 ###
+@locus Server
 @class Mailer
-@description Wrapper around Email to ease the usage
+@description Nice wrapper around Email
 ###
 class Meteor.Mailer
   ###
-  @namespace Mailer
-  @param {Object} settings - Connection, sending and other settings
+  @constructor
+  @param settings {Object} - Connection, sending and other settings
   @description For more info about constrictor options see README.md and docs
   ###
   constructor: (settings = {}) ->
@@ -70,54 +71,52 @@ class Meteor.Mailer
 
     if emailsToSend and emailsToSend.count() > 0
       _self = @
-      emailsToSend.forEach (letter) -> Meteor.defer ->
-        try
-          Email.send
-            from: if !!~_self.login.indexOf('@') then "<#{_self.login}> #{_self.accountName}" else "<#{_self.login}@#{_self.host}> #{_self.accountName}"
-            to:      letter.to
-            cc:      letter.opts?.cc
-            bcc:     letter.opts?.bcc
-            replyTo: letter.opts?.replyTo
-            subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
-            html:    _self.compileBody letter.opts, letter.template
+      emailsToSend.forEach (letter) -> 
+        Meteor.defer ->
+          try
+            Email.send
+              from: if !!~_self.login.indexOf('@') then "<#{_self.login}> #{_self.accountName}" else "<#{_self.login}@#{_self.host}> #{_self.accountName}"
+              to:      letter.to
+              cc:      letter.opts?.cc
+              bcc:     letter.opts?.bcc
+              replyTo: letter.opts?.replyTo
+              subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
+              html:    _self.compileBody letter.opts, letter.template
 
-          if letter.callback and _self.callbacks[letter.callback]
-            _self.callbacks[letter.callback] null, true, letter.to
-            delete _self.callbacks[letter.callback]
+            if letter.callback and _self.callbacks?[letter.callback]
+              _self.callbacks[letter.callback] null, true, letter.to
+              delete _self.callbacks[letter.callback]
 
-          if _self.saveHistory
-            mailQueue.update 
-              _id: letter._id
-            ,
-              $set: 
-                isSent: true
-          else
-            mailQueue.remove _id: letter._id
+            if _self.saveHistory
+              mailQueue.update {_id: letter._id}, {$set: isSent: true}
+            else
+              mailQueue.remove {_id: letter._id}
 
-          console.info "Email was successfully sent to #{letter.to}" if _self.verbose
-        catch e
-          console.info "Email wasn't sent to #{letter.to}", e if _self.verbose
-          mailQueue.update 
-            _id: letter._id
-          ,
-            $inc: tries: 1
+            console.info "Email was successfully sent to #{letter.to}" if _self.verbose
+          catch e
+            console.info "Email wasn't sent to #{letter.to}", e if _self.verbose
+            mailQueue.update { _id: letter._id}, {$inc: tries: 1}
 
-          if letter.callback and _self.callbacks?[letter.callback]
-            _self.callbacks[letter.callback] {error: e}, false, letter.to
-          console.info "Trying to send email to #{letter.to} again for #{++letter.tries} time(s)" if _self.verbose
+            if letter.callback and _self.callbacks?[letter.callback]
+              _self.callbacks[letter.callback] {error: e}, false, letter.to
+
+            console.info "Trying to send email to #{letter.to} again for #{++letter.tries} time(s)" if _self.verbose
+          return
         return
 
   ###
-  @namespace Mailer
-  @method send
-  @param  {Object} opts - Sending options object with next arguments:
-      {String} recipient  - E-mail address of recipient
-      {String} subject    - Letter Subject (plain-text or HTML)
-      {String} message    - Letter Message (plain-text or HTML)
-      {String} template   - [OPTIONAL] Plain-text or HTML with Spacebars-like placeholders
-      {Date}   sendAt     - [OPTIONAL] When email should be sent (current time - by default)
-      [{String}..]        - Any other property as a String which will be used as template helpers
-      {Function} callback - Callback function: `function(error, success, recipientEmail)`
+  @locus Server
+  @memberOf Mailer
+  @name send
+  @param  opts  {Object}  - Object with next properties:
+  @param opts.recipient {String}   - E-mail address of recipient
+  @param opts.subject   {String}   - Letter Subject (plain-text or HTML)
+  @param opts.message   {String}   - Letter Message (plain-text or HTML)
+  @param opts.template  {String}   - [OPTIONAL] Plain-text or HTML with Spacebars-like placeholders
+  @param opts.sendAt    {Date}     - [OPTIONAL] When email should be sent (current time - by default)
+  @param opts[any]      {String}   - Any other property as a String which will be used as template helpers
+  @param opts.callback  {Function} - Callback function: `function(error, success, recipientEmail)`
+  @returns {undefined}
   ###
   send: (opts, callback = false) =>
     opts.sendAt ?= new Date
@@ -135,23 +134,31 @@ class Meteor.Mailer
     return
 
   ###
-  @namespace Mailer
-  @method  compileBody
-  @param  {Object} helpers
-    Options opts {object} containing:
-    @param  {String} subject - Letter subject
-    @param  {String} message - Message text, letter body
-    @param  {String} lang    - [OPTIONAL] Language
-    @param  {String} template- [OPTIONAL] Plain-text or HTML with Spacebars-like placeholders
+  @locus Server
+  @memberOf Mailer
+  @name compileBody
+  @param  helpers  {Object}  - Configuration Object with next properties:
+  @param  helpers.subject  {String}  - Letter subject
+  @param  helpers.message  {String}  - Message text, letter body
+  @param  helpers.lang     {String}  - [OPTIONAL] Language
+  @param  template {String}  - [OPTIONAL] Plain-text or HTML with Spacebars/Blaze-like placeholders
+  @returns {String}
   ###
   compileBody: (helpers={}, template) =>
     if template
       tmplt = template
     else
       tmplt = if not @template then @basicHTMLTempate else @template
-
     return renderReplace tmplt, helpers
 
+  ###
+  @locus Server
+  @memberOf Mailer
+  @name renderReplace
+  @param  string  {String}  - Template with Spacebars/Blaze-like placeholders
+  @param  replacements  {Object}  - Blaze-like helpers Object
+  @returns {String}
+  ###
   renderReplace = (string, replacements) ->
     matchHTML = string.match /\{{3}\s?([a-z0-9\-\_]+)\s?\}{3}/g
     for html in matchHTML
