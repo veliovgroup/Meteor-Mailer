@@ -1,6 +1,6 @@
 Package.describe({
   name: 'ostrio:mailer',
-  version: '1.2.1',
+  version: '1.2.2',
   summary: 'Emails queue with schedule and support of HTML-Templates, and custom SMTP connection',
   git: 'https://github.com/VeliovGroup/Meteor-Mailer',
   documentation: 'README.md'
