@@ -1,12 +1,17 @@
-Meteor Mailer
+Meteor Mailer (MailTime)
 =============
-Simply sends emails via built-in Email.send method, but with support of HTML-templates and SMTP.
+Send emails via built-in `Email.send()` method, but with support of HTML-templates, SMTP and Queue + retries. If there is error with email sending, like connection to SMTP, - letter will be placed into queue and tried to send it 50 times with progressive interval up to 60 seconds.
 
-If there is error with email sending, like connection to SMTP, - letter will be placed into queue and tried to send it 50 times after 60 seconds.
+ES6 Import:
+======
+```jsx
+import { MailTime } from 'meteor/ostrio:mailer';
+```
 
-## Initialization:
+Initialize:
+======
 ```js
-Mailer = new Meteor.Mailer(options);
+Mailer = new MailTime(options);
 ```
 
 `options` {*Object*} - Object with next properties:
@@ -25,7 +30,7 @@ Mailer = new Meteor.Mailer(options);
 #### Example:
 For gmail hosted mail:
 ```js
-Mailer = new Meteor.Mailer({
+Mailer = new MailTime({
   login: 'noreply-meteor',
   host: 'gmail.com',
   connectionUrl: 'smtp://account:password@smtp.gmail.com:465',
@@ -40,7 +45,7 @@ Mailer = new Meteor.Mailer({
 
 For own hosted smtp server:
 ```js
-Mailer = new Meteor.Mailer({
+Mailer = new MailTime({
   login: 'no-reply@example.com',
   host: 'smtp.example.com',
   connectionUrl: 'smtp://no-reply@example.com:password@smtp.example.com:587',
@@ -48,10 +53,12 @@ Mailer = new Meteor.Mailer({
 });
 ```
 
-## Usage
+Send:
+======
 #### `.send()` method
-```coffee
-Mailer.send options, callback
+```js
+Mailer = new MailTime({/* .. */});
+Mailer.send(options, callback)
 ```
  - `options` {*Object*}:
   - `to` {*String*} - [*required*] Recipient email address
