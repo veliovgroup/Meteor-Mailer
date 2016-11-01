@@ -160,13 +160,13 @@ class MailTime
   @returns {String}
   ###
   renderReplace = (string, replacements) ->
-    matchHTML = string.match /\{{3}\s?([a-z0-9\-\_]+)\s?\}{3}/g
+    matchHTML = string.match /\{{3}\s?([a-zA-Z0-9\-\_]+)\s?\}{3}/g
     if matchHTML
       for html in matchHTML
         if replacements[html.replace("{{{", "").replace("}}}", "").trim()]
           string = string.replace html, replacements[html.replace("{{{", "").replace("}}}", "").trim()]
 
-    matchStr  = string.match /\{{2}\s?([a-z0-9\-\_]+)\s?\}{2}/g
+    matchStr  = string.match /\{{2}\s?([a-zA-Z0-9\-\_]+)\s?\}{2}/g
     if matchStr
       for str in matchStr
         if replacements[str.replace("{{", "").replace("}}", "").trim()]
