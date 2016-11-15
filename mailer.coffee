@@ -72,35 +72,38 @@ class MailTime
     if emailsToSend and emailsToSend.count() > 0
       _self = @
       emailsToSend.forEach (letter) -> 
-        Meteor.defer ->
-          try
-            Email.send
-              from: if !!~_self.login.indexOf('@') then "<#{_self.login}> #{_self.accountName}" else "<#{_self.login}@#{_self.host}> #{_self.accountName}"
-              to:      letter.to
-              cc:      letter.opts?.cc
-              bcc:     letter.opts?.bcc
-              replyTo: letter.opts?.replyTo
-              subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
-              html:    _self.compileBody letter.opts, letter.template
+        mailQueue.update {_id: letter._id}, {$set: isSent: true}, ->
+          Meteor.defer ->
+            try
+              Email.send
+                from: if !!~_self.login.indexOf('@') then "<#{_self.login}> #{_self.accountName}" else "<#{_self.login}@#{_self.host}> #{_self.accountName}"
+                to:      letter.to
+                cc:      letter.opts?.cc
+                bcc:     letter.opts?.bcc
+                replyTo: letter.opts?.replyTo
+                subject: letter.subject.replace /<(?:.|\n)*?>/gm, ''
+                html:    _self.compileBody letter.opts, letter.template
 
-            if letter.callback and _self.callbacks?[letter.callback]
-              _self.callbacks[letter.callback] null, true, letter.to
-              delete _self.callbacks[letter.callback]
+              if letter.callback and _self.callbacks?[letter.callback]
+                _self.callbacks[letter.callback] null, true, letter.to
+                delete _self.callbacks[letter.callback]
 
-            if _self.saveHistory
-              mailQueue.update {_id: letter._id}, {$set: isSent: true}
-            else
-              mailQueue.remove {_id: letter._id}
+              unless _self.saveHistory
+                mailQueue.remove {_id: letter._id}
 
-            console.info "Email was successfully sent to #{letter.to}" if _self.verbose
-          catch e
-            console.info "Email wasn't sent to #{letter.to}", e if _self.verbose
-            mailQueue.update { _id: letter._id}, {$inc: tries: 1}
+              console.info "Email was successfully sent to #{letter.to}" if _self.verbose
+            catch e
+              console.info "Email wasn't sent to #{letter.to}", e if _self.verbose
+              mailQueue.update { _id: letter._id}, {
+                $set: isSent: false
+                $inc: tries: 1
+              }
 
-            if letter.callback and _self.callbacks?[letter.callback]
-              _self.callbacks[letter.callback] {error: e}, false, letter.to
+              if letter.callback and _self.callbacks?[letter.callback]
+                _self.callbacks[letter.callback] {error: e}, false, letter.to
 
-            console.info "Trying to send email to #{letter.to} again for #{++letter.tries} time(s)" if _self.verbose
+              console.info "Trying to send email to #{letter.to} again for #{++letter.tries} time(s)" if _self.verbose
+            return
           return
         return
 
