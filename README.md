@@ -1,108 +1,159 @@
 Meteor Mailer (MailTime)
 =============
-Send emails via built-in `Email.send()` method, but with support of HTML-templates, SMTP and Queue + retries. If there is error with email sending, like connection to SMTP, - letter will be placed into queue and tried to send it 50 times with progressive interval up to 60 seconds.
+This is port of [`mail-time`](https://github.com/VeliovGroup/Mail-Time) NPM library.
 
-ES6 Import:
+Micro-service package for mail queue, with *Server* and *Client* API. 
+Build on top of [`nodemailer`](https://github.com/nodemailer/nodemailer) package.
+
+Every `MailTime` instance can be configured to be a *Server* or *Client*.
+
+Main difference of *Server* from *Client* - *Server* handles queue and actually sends email. 
+While *Client* is only puts email into queue.
+
+Prerequisites
 ======
+If you're working on Server functionality - first you will need `nodemailer`, although this package is meant to be used with `nodemailer`, it's not added as dependency, as it not needed by Client, and you're free to choose `nodemailer`'s version to fit your needs:
+```shell
+meteor npm install --save nodemailer
+```
+
+Installation & Import (*via Atmosphere*):
+======
+Install *MailTime* package:
+```shell
+meteor add ostrio:mailer
+```
+ES6 Import:
 ```jsx
 import { MailTime } from 'meteor/ostrio:mailer';
 ```
 
-Initialize:
+Installation & Import (*via NPM*):
 ======
-```js
-Mailer = new MailTime(options);
+Install *MailTime* package (*via NPM*):
+```shell
+meteor npm install --save mail-time
 ```
+Please see NPM version docs at [`mail-time`](https://github.com/VeliovGroup/Mail-Time) project page
 
-`options` {*Object*} - Object with next properties:
- - `login` {*String*} - [required] Your login on SMTP server, ex.: `no-reply`
- - `host` {*String*} - [required] Domain name or IP-address of SMTP server, ex.: `smtp.example.com`
- - `connectionUrl` {*String*} - [required] Connection (auth) URL with login, password and port, ex.: `smtp://account:password@smtp.gmail.com:465`
- - `accountName` {*String*} - Name of the account (usually shown next to or instead of email address). By default equals to `login` property, ex.: `Some Service Name Support`
- - `intervalTime` {*Number*} - How often try to send an email in seconds. By default `60` seconds, ex.: `600`
- - `retryTimes` {*Number*} - How many times to retry to send email. By default `50`, ex.: `10`
- - `saveHistory` {*Boolean*} - Save sent emails. By default `false`, ex.: `true`
- - `verbose` {*Boolean*} - Show messages of sending/pending into server's console. By default `false`, ex.: `true`
- - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
-   * if is not set, email will be sent within our default sleek built-in template
-   * `template` should be plain-text or HTML with Spacebars-like placeholders
-
-#### Example:
-For gmail hosted mail:
-```js
-Mailer = new MailTime({
-  login: 'noreply-meteor',
-  host: 'gmail.com',
-  connectionUrl: 'smtp://account:password@smtp.gmail.com:465',
-  accountName: 'My Project MailBot',
-  verbose: true,
-  intervalTime: 120,
-  retryTimes: 10,
-  saveHistory: true,
-  template: 'Plain-text or HTML with Spacebars-like placeholders'
-});
+```jsx
+import MailTime from 'mail-time';
 ```
+Please see NPM version docs at [`mail-time`](https://github.com/VeliovGroup/Mail-Time) project page
 
-For own hosted smtp server:
-```js
-Mailer = new MailTime({
-  login: 'no-reply@example.com',
-  host: 'smtp.example.com',
-  connectionUrl: 'smtp://no-reply@example.com:password@smtp.example.com:587',
-  accountName: 'My Project MailBot'
-});
-```
-
-Send:
+Usage:
 ======
-#### `.send()` method
-```js
-Mailer = new MailTime({/* .. */});
-Mailer.send(options, callback);
-```
- - `options` {*Object*}:
-  - `to` {*String*} - [*required*] Recipient email address
-  - `cc` {*String*} - [*optional*] Recipient email address
-  - `bcc` {*String*} - [*optional*] Recipient email address
-  - `replyTo` {*String*} - [*optional*] Recipient email address
-  - `subject` {*String*} - [*required*] Plain text or HTML
-  - `message` {*String*} - [*required*] Plain text or HTML with placeholders
-  - `sendAt` {*Date*} - Date when email should be sent. By default - current time
-  - `template` {*String*} - Plain-text or HTML with Spacebars-like placeholders
-    * if is not set, by default email will be sent within `template` passed via initialization options or our default template
-    * `template` should be plain-text or HTML with Spacebars-like placeholders
- - `callback` {*Function*} - [Optional] Arguments `error`, `success` and `recipient` arguments. __Note__: There is no way to use this callback function in multi-server infrastructure, callbacks is stored in-memory and will be wiped upon server restart. *Primary usage for callback is debugging, __do not use for logic/algorithm/etc.__*
+To create nodemailer's transports see [nodemailer docs](https://github.com/nodemailer/nodemailer/tree/v2#setting-up) and [`mail-time`](https://github.com/VeliovGroup/Mail-Time#basic-usage) project page
 
-#### Example:
-```js
-Mailer.send({
-  to: 'to@example.com',
-  message: 'Some HTML or plain-text string (required)',
-  subject: 'Some HTML or plain-text string (required)',
-  template: '<html> <head> <title>{{Subject}}</title> </head> <body> <h3>{{{Subject}}}</h3> <p>{{{Message}}}</p></body></html>',
-}, function(error, success, recipient) {
-  if (error) {
-    console.log("mail is not sent to " + recipient);
-  }
-  if (success) {
-    return console.log("mail successfully sent to " + recipient);
-  }
+```jsx
+import nodemailer from 'nodemailer';
+const transports = [];
+// First transport
+transports.push(nodemailer.createTransport({/*...*/});
+// Second transport
+transports.push(nodemailer.createTransport({/*...*/});
+// Third transport
+transports.push(nodemailer.createTransport({/*...*/});
+```
+
+Create `mail-time` *Server*, it is able to send and add emails to queue.
+__On single-server setup__ - use *Server* instance to put emails into queue and actually send them
+```jsx
+import { Mongo }    from 'meteor/mongo';
+import { MailTime } from 'meteor/ostrio:mailer';
+
+const MailQueue = new MailTime({
+  db: Mongo.Collection('__mailTimeQueue__').rawDatabase(),
+  type: 'server',
+  strategy: 'balancer', // Transports will be used in round robin chain
+  transports,
+  from(transport) {
+    // To pass spam-filters `from` field should be correctly set
+    // for each transport, check `transport` object for more options
+    return `"Awesome App" <${transport._options.from}>`;
+  },
+  concatEmails: true, // Concatenate emails to the same addressee
+  concatDelimiter: '<h1>{{{subject}}}</h1>', // Start each concatenated email with it's own subject
+  template: MailTime.Template // Use default template
 });
 ```
 
-#### Template example (should be passed to `template` as *String*):
-```html
-<html lang="{{lang}}">
-  <head>
-    ...
-    <title>{{Subject}}</title>
-  </head>
-  <body>
-    <h3>{{{Subject}}}</h3>
-    <p>{{{Message}}}</p>
-    <footer>
-      <a href="{{url}}">{{appname}}</a>
-    </footer>
-  </body>
-</html>
+Create client to add emails to queue from other application units, like UI unit:
+```jsx
+import { MailTime } from 'meteor/ostrio:mailer';
+
+const MailQueue = new MailTime({
+  db: Mongo.Collection('__mailTimeQueue__').rawDatabase(),
+  type: 'client',
+  strategy: 'balancer', // Transports will be used in round robin chain
+  concatEmails: true // Concatenate emails to the same address
+});
+```
+
+Send email:
+```jsx
+MailQueue.sendMail({
+  to: 'user@gmail.com',
+  subject: 'You\'ve got an email!',
+  text: 'Plain text message',
+  html: '<h1>HTML</h1><p>Styled message</p>'
+});
+```
+
+API
+======
+## `new MailTime(opts)` constructor
+ - `opts` {*Object*} - Configuration object
+ - `opts.db` {*Db*} - Raw MongoDB connection instance. For example: `Mongo.Collection('anyCollectionName').rawDatabase()` or `Meteor.users.rawDatabase()`
+ - `opts.type` {*String*} - `client` or `server`, default - `server`
+ - `opts.from` {*Function*} - Function which returns *String* of `from` field, format: `"MyApp" <user@example.com>`
+ - `opts.transports` {*Array*} - Array of `nodemailer`'s transports, returned from `nodemailer.createTransport({})`
+ - `opts.strategy` {*String*} - `backup` or `balancer`, default - `backup`. If set to `backup`, first transport will be used unless failed to send `failsToNext` times. If set to `balancer` - transports will be used equally in round robin chain
+ - `opts.failsToNext` {*Number*} - After how many failed send attempts switch to next transport, applied only for `backup` strategy, default - `4`
+ - `opts.prefix` {*String*} - Use unique prefixes to create multiple `MailTime` instances on same MongoDB
+ - `opts.maxTries` {*Number*} - How many times re-send failed emails, default - `60`
+ - `opts.interval` {*Number*} - Interval in *seconds* between send re-tries, default - `60`
+ - `opts.concatEmails` {*Boolean*} - Concatenate email by `to` field, default - `false`
+ - `opts.concatSubject` {*String*} - Email subject used concatenated email, default - `Multiple notifications`
+ - `opts.concatDelimiter` {*String*} - HTML or plain string delimited used between concatenated email, default - `<hr>`
+ - `opts.concatThrottling` {*Number*} - Time in *seconds* while emails waiting to be concatenated, default - `60`
+ - `opts.debug` {*Boolean*} - Print queue logs, default - `false`
+ - `opts.template` {*String*} - Mustache-like template, default - `{{{html}}}`, all options passed to `sendMail` is available in Template, like `to`, `subject`, `text`, `html` or any other custom option. Use `{{opt}}` for string placeholders and `{{{opt}}}` for html placeholders
+
+## `sendMail(opts [, callback])`
+ - Alias - `send()`
+ - `opts` {*Object*} - Configuration object
+ - `opts.sendAt` {*Date*} - When email should be sent, default - `new Date()` use with caution on multi-server setup at different location with different time-zones
+ - `opts.template` - Email specific template, will override default template passed to `MailTime` constructor
+ - `opts.concatSubject` - Email specific concatenation subject, will override default concatenation subject passed to `MailTime` constructor
+ - `opts[key]` {*Mix*} - Other custom and NodeMailer specific options, like `text`, `html` and `to`, see more [here](https://github.com/nodemailer/nodemailer/tree/v2#e-mail-message-fields). Note `attachments` should work only via `path`, and file must exists on all micro-services servers
+ - `callback` {*Function*} - Callback after email was sent or failed to be sent. __Do not use on mutli-server setup__
+
+### `static MailTime.Template`
+Simple and bulletproof HTML template, see its [source](https://github.com/VeliovGroup/Mail-Time/blob/master/template.html). Usage:
+```jsx
+// Make it default
+const MailQueue = new MailTime({
+  /* .. */
+  template: MailTime.Template
+});
+
+// For single letter
+MailQueue.sendMail({
+  to: 'user@gmail.com',
+  /* .. */
+  template: MailTime.Template
+});
+```
+
+## Template Example
+```jsx
+MailQueue.sendMail({
+  to: 'user@gmail.com',
+  userName: 'Mike',
+  subject: 'Sign up confirmation',
+  text: 'Hello {{userName}}, \r\n Thank you for registration \r\n Your login: {{to}}',
+  html: '<div style="text-align: center"><h1>Hello {{userName}}</h1><p><ul><li>Thank you for registration</li><li>Your login: {{to}}</li></ul></p></div>'
+  template: '<body>{{{html}}}</body>'
+});
 ```
