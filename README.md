@@ -58,8 +58,7 @@ Install *MailTime* package:
 ```shell
 meteor npm install --save mail-time
 ```
-Please see NPM version docs at [`mail-time`](https://github.com/VeliovGroup/Mail-Time) project page
-
+ES6 Import:
 ```jsx
 import MailTime from 'mail-time';
 ```
