@@ -80,6 +80,7 @@ transports.push(nodemailer.createTransport({/*...*/});
 ```
 
 Create `mail-time` *Server*, it is able to send and add emails to queue.
+
 __On single-server setup__ - use *Server* instance to put emails into queue and actually send them
 ```jsx
 import { Mongo }    from 'meteor/mongo';
