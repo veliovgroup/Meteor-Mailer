@@ -152,7 +152,7 @@ API
  - `opts[key]` {*Mix*} - Other custom and NodeMailer specific options, like `text`, `html` and `to`, see more [here](https://github.com/nodemailer/nodemailer/tree/v2#e-mail-message-fields). Note `attachments` should work only via `path`, and file must exists on all micro-services servers
  - `callback` {*Function*} - Callback after email was sent or failed to be sent. __Do not use on mutli-server setup__
 
-### `static MailTime.Template`
+## `static MailTime.Template`
 Simple and bulletproof HTML template, see its [source](https://github.com/VeliovGroup/Mail-Time/blob/master/template.html). Usage:
 ```jsx
 // Make it default
