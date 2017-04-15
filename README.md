@@ -10,6 +10,30 @@ Every `MailTime` instance can be configured to be a *Server* or *Client*.
 Main difference of *Server* from *Client* - *Server* handles queue and actually sends email. 
 While *Client* is only puts email into queue.
 
+ToC
+======
+ - [Features](https://github.com/VeliovGroup/Meteor-Mailer#features)
+ - [Prerequisites](https://github.com/VeliovGroup/Meteor-Mailer#prerequisites)
+ - [Install via Atmosphere](https://github.com/VeliovGroup/Meteor-Mailer#installation--import-via-atmosphere)
+ - [Install via NPM](https://github.com/VeliovGroup/Meteor-Mailer#installation--import-via-npm)
+ - [Usage examples](https://github.com/VeliovGroup/Meteor-Mailer#usage)
+ - [API](https://github.com/VeliovGroup/Meteor-Mailer#api)
+   * [*Constructor*](https://github.com/VeliovGroup/Meteor-Mailer#new-mailtimeopts-constructor)
+   * [`.send()`](https://github.com/VeliovGroup/Meteor-Mailer#sendmailopts--callback)
+   * [Default Template](https://github.com/VeliovGroup/Meteor-Mailer#static-mailtimetemplate)
+ - [Custom Templates](https://github.com/VeliovGroup/Meteor-Mailer#template-example)
+ - Looking for pure NPM package? - Use [`mail-time`](https://github.com/VeliovGroup/Mail-Time)
+
+Features
+======
+ - Queue - Managed via MongoDB, and will survive server reboots and failures
+ - Support for multiple server setup - "Cluster", Phusion Passenger instances, Load Balanced solutions, etc.
+ - Emails concatenation by addressee email - Reduce amount of sent email to single user with concatenation, and avoid mistakenly doubled emails
+ - When concatenation is enabled - Same emails wouldn't be sent twice, if for any reason, due to bad logic or application failure emails is sent twice or more times - here is solution to solve this annoying behavior
+ - Balancing for multiple nodemailer's transports, two modes - `backup` and `balancing`. Most useful feature - allows to reduce cost for SMTP services and add durability. So, if any of used transports is fails to send an email it will switch to next one
+ - Sending retries for network and other failures
+ - Template support with Mustache-like placeholders
+
 Prerequisites
 ======
 If you're working on Server functionality - first you will need `nodemailer`, although this package is meant to be used with `nodemailer`, it's not added as dependency, as it not needed by Client, and you're free to choose `nodemailer`'s version to fit your needs:
@@ -30,7 +54,7 @@ import { MailTime } from 'meteor/ostrio:mailer';
 
 Installation & Import (*via NPM*):
 ======
-Install *MailTime* package (*via NPM*):
+Install *MailTime* package:
 ```shell
 meteor npm install --save mail-time
 ```
