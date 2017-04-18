@@ -12,6 +12,10 @@ While *Client* is only puts email into queue.
 
 ToC
 ======
+ - [How it works?](https://github.com/VeliovGroup/Meteor-Mailer#how-it-works)
+   * [With single SMTP](https://github.com/VeliovGroup/Meteor-Mailer#single-point-of-failure)
+   * [With multiple SMTP](https://github.com/VeliovGroup/Meteor-Mailer#multiple-smtp-providers)
+   * [As Micro-Service](https://github.com/VeliovGroup/Meteor-Mailer#cluster-issue)
  - [Features](https://github.com/VeliovGroup/Meteor-Mailer#features)
  - [Prerequisites](https://github.com/VeliovGroup/Meteor-Mailer#prerequisites)
  - [Install via Atmosphere](https://github.com/VeliovGroup/Meteor-Mailer#installation--import-via-atmosphere)
@@ -23,6 +27,74 @@ ToC
    * [Default Template](https://github.com/VeliovGroup/Meteor-Mailer#static-mailtimetemplate)
  - [Custom Templates](https://github.com/VeliovGroup/Meteor-Mailer#template-example)
  - Looking for pure NPM package? - Use [`mail-time`](https://github.com/VeliovGroup/Mail-Time)
+
+## How it works?:
+
+#### Single point of failure
+Issue - classic solution with single point of failure:
+```ascii
+|----------------|         |------|         |------------------|
+|  Other mailer  | ------> | SMTP | ------> |  ^_^ Happy user  |
+|----------------|         |------|         |------------------|
+
+Scheme above will work as long as SMTP service is available
+or connection between your server and SMPT is up. Once network
+failure occurs or SMTP service is down - users won't be happy
+
+|----------------|  \ /    |------|         |------------------|
+|  Other mailer  | --X---> | SMTP | ------> | 0_o Disappointed |
+|----------------|  / \    |------|         |------------------|
+                     ^- email lost in vain
+
+Single SMTP solution may work in case of network or other failures
+As long as MailTime has not received confirmation what email is sent
+it will keep letter in queue and retry to send it again
+
+|----------------|    /    |------|         |------------------|
+|   Mail Time    | --X---> | SMTP | ------> |  ^_^ Happy user  |
+|---^------------|  /      |------|         |------^-----------|
+     \-------------/ ^- We will try later         /
+      \- put it back into queue                  /
+       \----------Once connection is back ------/
+```
+
+#### Multiple SMTP providers
+Back up scheme with multiple SMTP providers
+```ascii
+                           |--------|
+                     /--X--| SMTP 1 |
+                    /   ^  |--------|
+                   /    \--- Retry with next provider
+|----------------|/        |--------|         |------------------|
+|   Mail Time    | ---X--> | SMTP 2 |      /->|  ^_^ Happy user  |
+|----------------|\   ^    |--------|     /   |------------------|
+                   \  \--- Retry         /
+                    \      |--------|   /
+                     \---->| SMTP 3 |--/
+                           |--------|
+```
+
+#### Cluster issue
+Let's say you have an app which is growing fast. At the some point you've decided to create a "Cluster" of servers to balance the load and add durability layer.
+
+Also your application has scheduled emails, for example once a day with recent news. While you have had a single server emails was sent by some daily interval. So, after you made a "Cluster" of servers - each server has it's own timer and going to send daily email to our user. In such case - users will receive 3 emails, sounds not okay.
+
+Here is how we solve this issue:
+```ascii
+|===================THE=CLUSTER==================| |=QUEUE=| |===Mail=Time===|
+| |----------|     |----------|     |----------| | |       | |=Micro-service=|   |--------|
+| |   App    |     |   App    |     |   App    | | |       | |               |-->| SMTP 1 |------\
+| | Server 1 |     | Server 2 |     | Server 3 | | |    <--------            |   |--------|       \
+| |-----\----|     |----\-----|     |----\-----| | |    -------->            |                |-------------|
+|        \---------------\----------------\--------->      | |               |   |--------|   |     ^_^     |
+| Each of the "App Server" or "Cluster Node"     | |       | |               |-->| SMTP 2 |-->| Happy users |
+| Runs Mail Time as a Client which only puts     | |       | |               |   |--------|   |-------------|
+| emails into queue. Aside to "App Servers"      | |       | |               |                    /
+| We suggest to run Mail Time as a Micro-service | |       | |               |   |--------|      /
+| which will be responsible to make sure queue   | |       | |               |-->| SMTP 3 |-----/
+| has no duplicates and to actually send emails  | |       | |               |   |--------|
+|================================================| |=======| |===============|
+```
 
 Features
 ======
