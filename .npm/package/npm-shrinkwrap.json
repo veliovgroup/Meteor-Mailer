@@ -8,7 +8,7 @@
     "buffer-shims": {
       "version": "1.0.0",
       "resolved": "https://registry.npmjs.org/buffer-shims/-/buffer-shims-1.0.0.tgz",
-      "from": "buffer-shims@>=1.0.0 <2.0.0"
+      "from": "buffer-shims@>=1.0.0 <1.1.0"
     },
     "core-util-is": {
       "version": "1.0.2",
@@ -36,24 +36,24 @@
       "from": "isarray@>=1.0.0 <1.1.0"
     },
     "josk": {
-      "version": "1.0.2",
-      "resolved": "https://registry.npmjs.org/josk/-/josk-1.0.2.tgz",
-      "from": "josk@>=1.0.2 <2.0.0"
+      "version": "1.0.3",
+      "resolved": "https://registry.npmjs.org/josk/-/josk-1.0.3.tgz",
+      "from": "josk@>=1.0.3 <2.0.0"
     },
     "mail-time": {
-      "version": "0.1.0",
-      "resolved": "file:../npm-mail-time",
-      "from": "mail-time@0.1.0"
+      "version": "0.1.1",
+      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-0.1.1.tgz",
+      "from": "mail-time@0.1.1"
     },
     "mongodb": {
-      "version": "2.2.25",
-      "resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.25.tgz",
-      "from": "mongodb@>=2.2.25 <3.0.0"
+      "version": "2.2.26",
+      "resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.26.tgz",
+      "from": "mongodb@>=2.2.26 <3.0.0"
     },
     "mongodb-core": {
-      "version": "2.1.9",
-      "resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.1.9.tgz",
-      "from": "mongodb-core@2.1.9"
+      "version": "2.1.10",
+      "resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.1.10.tgz",
+      "from": "mongodb-core@2.1.10"
     },
     "process-nextick-args": {
       "version": "1.0.7",
@@ -61,9 +61,9 @@
       "from": "process-nextick-args@>=1.0.6 <1.1.0"
     },
     "readable-stream": {
-      "version": "2.1.5",
-      "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.1.5.tgz",
-      "from": "readable-stream@2.1.5"
+      "version": "2.2.7",
+      "resolved": "https://registry.npmjs.org/readable-stream/-/readable-stream-2.2.7.tgz",
+      "from": "readable-stream@2.2.7"
     },
     "require_optional": {
       "version": "1.0.0",
@@ -81,9 +81,9 @@
       "from": "semver@>=5.1.0 <6.0.0"
     },
     "string_decoder": {
-      "version": "0.10.31",
-      "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-0.10.31.tgz",
-      "from": "string_decoder@>=0.10.0 <0.11.0"
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/string_decoder/-/string_decoder-1.0.0.tgz",
+      "from": "string_decoder@>=1.0.0 <1.1.0"
     },
     "util-deprecate": {
       "version": "1.0.2",
