@@ -1,6 +1,6 @@
 Package.describe({
   name: 'ostrio:mailer',
-  version: '2.0.1',
+  version: '2.0.2',
   summary: 'Bulletproof email queue on top of NodeMailer with support of multiple clusters and servers setup',
   git: 'https://github.com/VeliovGroup/Meteor-Mailer',
   documentation: 'README.md'
@@ -13,5 +13,5 @@ Package.onUse(function(api) {
 });
 
 Npm.depends({
-  'mail-time': '0.1.1'
+  'mail-time': '0.1.3'
 });
