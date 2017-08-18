@@ -16,9 +16,9 @@
       "from": "core-util-is@>=1.0.0 <1.1.0"
     },
     "deepmerge": {
-      "version": "1.4.4",
-      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-1.4.4.tgz",
-      "from": "deepmerge@>=1.4.4 <2.0.0"
+      "version": "1.5.1",
+      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-1.5.1.tgz",
+      "from": "deepmerge@>=1.5.1 <2.0.0"
     },
     "es6-promise": {
       "version": "3.2.1",
@@ -36,24 +36,24 @@
       "from": "isarray@>=1.0.0 <1.1.0"
     },
     "josk": {
-      "version": "1.0.3",
-      "resolved": "https://registry.npmjs.org/josk/-/josk-1.0.3.tgz",
-      "from": "josk@>=1.0.3 <2.0.0"
+      "version": "1.0.5",
+      "resolved": "https://registry.npmjs.org/josk/-/josk-1.0.5.tgz",
+      "from": "josk@>=1.0.5 <2.0.0"
     },
     "mail-time": {
-      "version": "0.1.4",
-      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-0.1.4.tgz",
-      "from": "mail-time@0.1.4"
+      "version": "0.1.5",
+      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-0.1.5.tgz",
+      "from": "mail-time@0.1.5"
     },
     "mongodb": {
-      "version": "2.2.29",
-      "resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.29.tgz",
-      "from": "mongodb@>=2.2.29 <3.0.0"
+      "version": "2.2.31",
+      "resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.31.tgz",
+      "from": "mongodb@>=2.2.31 <3.0.0"
     },
     "mongodb-core": {
-      "version": "2.1.13",
-      "resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.1.13.tgz",
-      "from": "mongodb-core@2.1.13"
+      "version": "2.1.15",
+      "resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.1.15.tgz",
+      "from": "mongodb-core@2.1.15"
     },
     "process-nextick-args": {
       "version": "1.0.7",
@@ -81,8 +81,8 @@
       "from": "safe-buffer@>=5.1.0 <5.2.0"
     },
     "semver": {
-      "version": "5.3.0",
-      "resolved": "https://registry.npmjs.org/semver/-/semver-5.3.0.tgz",
+      "version": "5.4.1",
+      "resolved": "https://registry.npmjs.org/semver/-/semver-5.4.1.tgz",
       "from": "semver@>=5.1.0 <6.0.0"
     },
     "string_decoder": {
