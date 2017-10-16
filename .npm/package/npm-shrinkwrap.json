@@ -16,9 +16,9 @@
       "from": "core-util-is@>=1.0.0 <1.1.0"
     },
     "deepmerge": {
-      "version": "1.5.1",
-      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-1.5.1.tgz",
-      "from": "deepmerge@>=1.5.1 <2.0.0"
+      "version": "2.0.0",
+      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-2.0.0.tgz",
+      "from": "deepmerge@>=2.0.0 <3.0.0"
     },
     "es6-promise": {
       "version": "3.2.1",
@@ -36,24 +36,24 @@
       "from": "isarray@>=1.0.0 <1.1.0"
     },
     "josk": {
-      "version": "1.0.5",
-      "resolved": "https://registry.npmjs.org/josk/-/josk-1.0.5.tgz",
-      "from": "josk@>=1.0.5 <2.0.0"
+      "version": "1.1.0",
+      "resolved": "https://registry.npmjs.org/josk/-/josk-1.1.0.tgz",
+      "from": "josk@>=1.1.0 <2.0.0"
     },
     "mail-time": {
-      "version": "0.1.5",
-      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-0.1.5.tgz",
-      "from": "mail-time@0.1.5"
+      "version": "0.1.6",
+      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-0.1.6.tgz",
+      "from": "mail-time@0.1.6"
     },
     "mongodb": {
-      "version": "2.2.31",
-      "resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.31.tgz",
-      "from": "mongodb@>=2.2.31 <3.0.0"
+      "version": "2.2.33",
+      "resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.33.tgz",
+      "from": "mongodb@>=2.2.33 <3.0.0"
     },
     "mongodb-core": {
-      "version": "2.1.15",
-      "resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.1.15.tgz",
-      "from": "mongodb-core@2.1.15"
+      "version": "2.1.17",
+      "resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.1.17.tgz",
+      "from": "mongodb-core@2.1.17"
     },
     "process-nextick-args": {
       "version": "1.0.7",
