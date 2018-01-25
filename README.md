@@ -253,6 +253,13 @@ MailQueue.sendMail({
 });
 ```
 
+Testing
+======
+```shell
+meteor test-packages ./ --driver-package=meteortesting:mocha
+# Be patient, tests are taking around 2 mins
+```
+
 Support this project:
 ======
 This project wouldn't be possible without [ostr.io](https://ostr.io).

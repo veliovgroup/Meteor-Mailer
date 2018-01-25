@@ -1,17 +1,22 @@
 Package.describe({
   name: 'ostrio:mailer',
-  version: '2.0.6',
+  version: '2.1.0',
   summary: 'Bulletproof email queue on top of NodeMailer with support of multiple clusters and servers setup',
   git: 'https://github.com/VeliovGroup/Meteor-Mailer',
   documentation: 'README.md'
 });
 
 Package.onUse(function(api) {
-  api.versionsFrom('1.4');
+  api.versionsFrom('1.6');
   api.use(['mongo', 'ecmascript'], 'server');
   api.mainModule('mailer.js', 'server');
 });
 
+Package.onTest(function (api) {
+  api.use(['ecmascript', 'accounts-base', 'ostrio:mailer', 'practicalmeteor:mocha', 'practicalmeteor:chai', 'meteortesting:mocha'], 'server');
+  api.addFiles('tests.js', 'server');
+});
+
 Npm.depends({
-  'mail-time': '0.1.7'
+  'mail-time': '1.0.0'
 });
