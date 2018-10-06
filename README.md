@@ -158,7 +158,7 @@ import { Mongo }    from 'meteor/mongo';
 import { MailTime } from 'meteor/ostrio:mailer';
 
 const MailQueue = new MailTime({
-  db: Mongo.Collection('__mailTimeQueue__').rawDatabase(),
+  db: Meteor.users.rawDatabase(), // We just want to attain the database connection
   type: 'server',
   strategy: 'balancer', // Transports will be used in round robin chain
   transports,
