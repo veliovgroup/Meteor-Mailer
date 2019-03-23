@@ -2,19 +2,19 @@
   "lockfileVersion": 1,
   "dependencies": {
     "deepmerge": {
-      "version": "2.1.1",
-      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-2.1.1.tgz",
-      "integrity": "sha512-urQxA1smbLZ2cBbXbaYObM1dJ82aJ2H57A1C/Kklfh/ZN1bgH4G/n5KWhdNfOK11W98gqZfyYj7W4frJJRwA2w=="
+      "version": "3.2.0",
+      "resolved": "https://registry.npmjs.org/deepmerge/-/deepmerge-3.2.0.tgz",
+      "integrity": "sha512-6+LuZGU7QCNUnAJyX8cIrlzoEgggTM6B7mm+znKOX4t5ltluT9KLjN6g61ECMS0LTsLW7yDpNoxhix5FZcrIow=="
     },
     "josk": {
-      "version": "2.0.2",
-      "resolved": "https://registry.npmjs.org/josk/-/josk-2.0.2.tgz",
-      "integrity": "sha512-MFzPR+5Hr8+Rg+tUIch6PgN9HuI/WRP25kIak83aJeKCkMJvcNS7832jL4k0IuGHMxQ6IZK7w76E0Q9huhPKQQ=="
+      "version": "2.0.5",
+      "resolved": "https://registry.npmjs.org/josk/-/josk-2.0.5.tgz",
+      "integrity": "sha512-a2ZlBKBDj7Z7M0k/0Dv8ce/grtgVzqKet8QEbr0i2C1p3wdFIuonTSJJQKYEWfaR75VcsvcdOF1spW0RCVwbXw=="
     },
     "mail-time": {
-      "version": "1.0.2",
-      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-1.0.2.tgz",
-      "integrity": "sha512-p6Hu4LCaIxvty8f6TMBM+HLH25KHojyRp+6ZXcpY+c4FiNCqFZf0ThYABppDq66N9bm8C1od3Zn0z/UQZzT38Q=="
+      "version": "1.0.4",
+      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-1.0.4.tgz",
+      "integrity": "sha512-KAOX79pgCE7/+eMr2KIEezzCgCR3iVxjDjQ2aMfKpuvhBQODZNQ2CN/xTr7cmgOQP9G5kA/Wt/9VlD44/H7DqA=="
     }
   }
 }
