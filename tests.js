@@ -6,9 +6,9 @@ if (!process.env.MONGO_URL) {
   throw new Error('MONGO_URL env.var is not defined! Please run test with MONGO_URL, like `MONGO_URL=mongodb://127.0.0.1:27017/dbname npm test`');
 }
 
-const transports  = [];
-const DEBUG       = false;
-const db          = Meteor.users.rawDatabase();
+const transports = [];
+const DEBUG      = true;
+const db         = Meteor.users.rawDatabase();
 
 describe('Has MailTime Object', () => {
   it('MailTime is Constructor', () => {
@@ -76,7 +76,7 @@ describe('sendMail', function () {
 
   it('sendMail Template placeholders render', function (done) {
     mailQueue.sendMail({
-      to: 'test1@email.com',
+      to: 'mail-time-meteor-tests-1@md5hashing.net',
       subject: 'You\'ve got an email!',
       user: 'John',
       baseUrl: '<b>http://example.com</b>',
@@ -87,19 +87,19 @@ describe('sendMail', function () {
 
     setTimeout(() => {
       mailQueue.collection.findOne({
-        to: 'test1@email.com'
+        to: 'mail-time-meteor-tests-1@md5hashing.net'
       }, (findError, task) => {
         const rendered = mailQueue.___compileMailOpts(transports[0], task);
         assert.equal(rendered.html, '<p>Hi John, <b>http://example.com</b></p> http://example.com', 'HTML template is properly rendered');
         assert.equal(rendered.text, 'John, http://example.com', 'Text template is properly rendered');
         done();
       });
-    }, 2500);
+    }, 768);
   });
 
   it('sendMail with no template', function (done) {
     mailQueue.sendMail({
-      to: 'test2@email.com',
+      to: 'mail-time-meteor-tests-2@md5hashing.net',
       subject: 'You\'ve got an email!',
       user: 'John',
       text: 'Plain text',
@@ -108,19 +108,19 @@ describe('sendMail', function () {
 
     setTimeout(() => {
       mailQueue.collection.findOne({
-        to: 'test2@email.com'
+        to: 'mail-time-meteor-tests-2@md5hashing.net'
       }, (findError, task) => {
         const rendered = mailQueue.___compileMailOpts(transports[0], task);
         assert.equal(rendered.html, '<p>Plain text</p>', 'HTML template is properly rendered');
         assert.equal(rendered.text, 'Plain text', 'Text template is properly rendered');
         done();
       });
-    }, 2500);
+    }, 768);
   });
 
   it('sendMail with simple template', function (done) {
     mailQueue.sendMail({
-      to: 'test3@email.com',
+      to: 'mail-time-meteor-tests-3@md5hashing.net',
       userName: 'Mike',
       subject: 'Sign up confirmation',
       text: 'Hello {{userName}}, \r\n Thank you for registration \r\n Your login: {{to}}',
@@ -130,14 +130,14 @@ describe('sendMail', function () {
 
     setTimeout(() => {
       mailQueue.collection.findOne({
-        to: 'test3@email.com'
+        to: 'mail-time-meteor-tests-3@md5hashing.net'
       }, (findError, task) => {
         const rendered = mailQueue.___compileMailOpts(transports[0], task);
-        assert.equal(rendered.html, '<body><div style="text-align: center"><h1>Hello Mike</h1><p><ul><li>Thank you for registration</li><li>Your login: test3@email.com</li></ul></p></div></body>', 'HTML template is properly rendered');
-        assert.equal(rendered.text, 'Hello Mike, \r\n Thank you for registration \r\n Your login: test3@email.com', 'Text template is properly rendered');
+        assert.equal(rendered.html, '<body><div style="text-align: center"><h1>Hello Mike</h1><p><ul><li>Thank you for registration</li><li>Your login: mail-time-meteor-tests-3@md5hashing.net</li></ul></p></div></body>', 'HTML template is properly rendered');
+        assert.equal(rendered.text, 'Hello Mike, \r\n Thank you for registration \r\n Your login: mail-time-meteor-tests-3@md5hashing.net', 'Text template is properly rendered');
         done();
       });
-    }, 2500);
+    }, 768);
   });
 });
 
