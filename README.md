@@ -28,6 +28,13 @@ While *Client* is only put emails into the queue.
 - [Custom Templates](https://github.com/VeliovGroup/Meteor-Mailer#template-example)
 - Looking for pure NPM package? - Use [`mail-time`](https://github.com/VeliovGroup/Mail-Time)
 
+## Main features:
+
+- 👷‍♂️ ~85% tests coverage
+- 📦 Two simple dependencies, written from scratch for top performance
+- 😎 Synchronize email queue across multiple servers
+- 💪 Bulletproof design, built-in retries
+
 ## How it works?:
 
 ### Single point of failure
@@ -180,7 +187,7 @@ const MailQueue = new MailTime({
   from(transport) {
     // To pass spam-filters `from` field should be correctly set
     // for each transport, check `transport` object for more options
-    return `"Awesome App" <${transport._options.from}>`;
+    return `"Awesome App" <${transport.options.from}>`;
   },
   concatEmails: true, // Concatenate emails to the same addressee
   concatDelimiter: '<h1>{{{subject}}}</h1>', // Start each concatenated email with it's own subject

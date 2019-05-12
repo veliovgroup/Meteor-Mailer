@@ -12,9 +12,9 @@
       "integrity": "sha512-a2ZlBKBDj7Z7M0k/0Dv8ce/grtgVzqKet8QEbr0i2C1p3wdFIuonTSJJQKYEWfaR75VcsvcdOF1spW0RCVwbXw=="
     },
     "mail-time": {
-      "version": "1.0.4",
-      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-1.0.4.tgz",
-      "integrity": "sha512-KAOX79pgCE7/+eMr2KIEezzCgCR3iVxjDjQ2aMfKpuvhBQODZNQ2CN/xTr7cmgOQP9G5kA/Wt/9VlD44/H7DqA=="
+      "version": "1.0.5",
+      "resolved": "https://registry.npmjs.org/mail-time/-/mail-time-1.0.5.tgz",
+      "integrity": "sha512-DVzrJjxCTUMpueUkJAVd3eFgjdnLQWTYAKy6BoAZHHdHR2R27BFQ1nMd+FIfsztMHZfU1e/OU0woCThMymR7IA=="
     }
   }
 }
